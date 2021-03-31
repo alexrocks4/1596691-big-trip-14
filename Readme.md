@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Алексей Сакун](https://up.htmlacademy.ru/ecmascript/14/user/1596691).
-* Наставник: `Неизвестно`.
+* Наставник: [Даниил Царёв](https://up.htmlacademy.ru/ecmascript/14/user/945835).
 
 ---
 
