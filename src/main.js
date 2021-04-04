@@ -8,8 +8,12 @@ import { createTripEventsListItemTemplate } from './view/trip-events-list-item.j
 import { createTripEventEditTemplate } from './view/trip-event-edit.js';
 import { createTripEventAddTemplate } from './view/trip-event-add.js';
 import { createTripEventTemplate } from './view/trip-event.js';
+import { generateTripPoint } from './mock/trip-point.js';
 
-const MAX_EVENTS_COUNT = 3;
+const MAX_EVENTS_COUNT = 20;
+
+const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
+console.log(tripPoints);
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripInfoElement = tripMainElement.querySelector('.trip-info');
