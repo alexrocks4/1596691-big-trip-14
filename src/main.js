@@ -9,11 +9,11 @@ import { createTripEventEditTemplate } from './view/trip-event-edit.js';
 import { createTripEventAddTemplate } from './view/trip-event-add.js';
 import { createTripEventTemplate } from './view/trip-event.js';
 import { generateTripPoint } from './mock/trip-point.js';
+import dayjs from 'dayjs';
 
 const MAX_EVENTS_COUNT = 20;
 
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
-console.log(tripPoints);
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripInfoElement = tripMainElement.querySelector('.trip-info');
@@ -27,6 +27,12 @@ const render = (container, template, place = 'beforeend') => {
   }
 };
 
+const sortTripPointsByStartDate = (tripPoints) => {
+  return tripPoints
+    .slice()
+    .sort((pointA, pointB) => dayjs(pointA.startDate).diff(pointB.startDate));
+};
+
 render(tripInfoElement, createTripInfoTemplate());
 render(tripInfoElement, createTripCostTemplate());
 render(siteNavigationContainerElement, createSiteNavigationTemplate());
@@ -37,6 +43,11 @@ const tripEventsListElement = tripEventsElement.querySelector('.trip-events__lis
 render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventEditTemplate()));
 render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventAddTemplate()));
 
-for (let i = 0; i < MAX_EVENTS_COUNT; i++) {
-  render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventTemplate()));
-}
+const tripPointsSortedByStartDate = sortTripPointsByStartDate(tripPoints);
+const tripPointsTemplate = tripPointsSortedByStartDate.reduce((generalTemplate, tripPoint) => {
+  return generalTemplate + createTripEventsListItemTemplate(createTripEventTemplate(tripPoint));
+}, '');
+
+render(tripEventsListElement, tripPointsTemplate);
+
+
