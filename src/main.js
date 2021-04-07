@@ -1,6 +1,5 @@
 import { createSiteNavigationTemplate } from './view/site-navigation.js';
 import { createTripInfoTemplate } from './view/trip-info.js';
-import { createTripCostTemplate } from './view/trip-cost.js';
 import { createTripFilterTemplate } from './view/trip-filter.js';
 import { createTripSortTemplate } from './view/trip-sort.js';
 import { createTripEventsListTemplate } from './view/trip-events-list.js';
@@ -13,12 +12,11 @@ import { destinations } from './mock/destination.js';
 import { pointTypeToOffers } from './mock/offer.js';
 import dayjs from 'dayjs';
 
-const MAX_EVENTS_COUNT = 20;
+const MAX_EVENTS_COUNT = 3;
 
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 
 const tripMainElement = document.querySelector('.trip-main');
-const tripInfoElement = tripMainElement.querySelector('.trip-info');
 const siteNavigationContainerElement = tripMainElement.querySelector('.trip-controls__navigation');
 const tripFilterContainerElement = tripMainElement.querySelector('.trip-controls__filters');
 const tripEventsElement = document.querySelector('.trip-events');
@@ -35,8 +33,9 @@ const sortTripPointsByStartDate = (tripPoints) => {
     .sort((pointA, pointB) => dayjs(pointA.startDate).diff(pointB.startDate));
 };
 
-render(tripInfoElement, createTripInfoTemplate());
-render(tripInfoElement, createTripCostTemplate());
+const tripPointsSortedByStartDate = sortTripPointsByStartDate(tripPoints);
+
+render(tripMainElement, createTripInfoTemplate(tripPointsSortedByStartDate), 'afterbegin');
 render(siteNavigationContainerElement, createSiteNavigationTemplate());
 render(tripFilterContainerElement, createTripFilterTemplate());
 render(tripEventsElement, createTripSortTemplate());
@@ -58,7 +57,6 @@ const tripEventAddFormOptions = {
 };
 render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventEditTemplate(tripEventAddFormOptions)));
 
-const tripPointsSortedByStartDate = sortTripPointsByStartDate(tripPoints);
 const tripPointsTemplate = tripPointsSortedByStartDate.reduce((generalTemplate, tripPoint) => {
   return generalTemplate + createTripEventsListItemTemplate(createTripEventTemplate(tripPoint));
 }, '');
