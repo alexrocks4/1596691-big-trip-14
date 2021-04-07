@@ -1,5 +1,5 @@
 import { getRandomIntegerInclusive, getRandomArrayElement } from '../util.js';
-import { generateDestination } from './destination.js';
+import { destinations } from './destination.js';
 import { tripTypes } from './trip-type.js';
 import { pointTypeToOffers } from './offer.js';
 import dayjs from 'dayjs';
@@ -35,7 +35,7 @@ const generateTripPoint = () => {
   return {
     id: idsCounter++,
     type: tripType,
-    destination: generateDestination(),
+    destination: getRandomArrayElement(destinations),
     offers: generateTripPointOffers(tripType),
     startDate,
     endDate,

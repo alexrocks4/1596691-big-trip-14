@@ -1,5 +1,5 @@
 import sampleSize from 'lodash.samplesize';
-import { getRandomIntegerInclusive, getRandomArrayElement } from '../util.js';
+import { getRandomIntegerInclusive } from '../util.js';
 
 const MIN_SENTENCES_COUNT = 1;
 const MAX_SENTENCES_COUNT = 5;
@@ -28,14 +28,18 @@ const generatePictures = () => {
   });
 };
 
-export const generateDestination = () => {
+const generateDestination = (pointName) => {
   const sentencesCount = getRandomIntegerInclusive(MIN_SENTENCES_COUNT, MAX_SENTENCES_COUNT);
   const description = getRandomIntegerInclusive(0, 1) ? generateDescription(sentencesCount) : null;
   const pictures = getRandomIntegerInclusive(0, 1) ? generatePictures() : null;
 
   return {
-    name: getRandomArrayElement(pointNames),
+    name: pointName,
     description,
     pictures,
   };
 };
+
+const destinations = pointNames.map((name) => generateDestination(name));
+
+export { destinations };
