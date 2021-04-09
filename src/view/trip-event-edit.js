@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
+import { createElement } from '../util.js';
 
-export const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations, allOffers}) => {
+const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations, allOffers}) => {
   const { type = TRIP_TYPES[0],
     destination = destinations[0],
     offers: tripPointOffers,
@@ -137,3 +138,27 @@ export const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destin
       </section>
     </form>`;
 };
+
+
+export default class TripEventEdit {
+  constructor(option) {
+    this._element = null;
+    this._option = option;
+  }
+
+  getTemplate() {
+    return createTripEventEditTemplate(this._option);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

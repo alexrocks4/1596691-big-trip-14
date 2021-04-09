@@ -11,4 +11,15 @@ const getRandomArrayElement = (elements) => {
   return elements[randomArrayIndex];
 };
 
-export { getRandomIntegerInclusive, getRandomArrayElement };
+const createElement = (template) => {
+  const newElement = document.createElement('div');
+  newElement.innerHTML = template;
+
+  return newElement.firstChild;
+};
+
+export {
+  getRandomIntegerInclusive,
+  getRandomArrayElement,
+  createElement
+};
