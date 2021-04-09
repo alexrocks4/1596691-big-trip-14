@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 
+const MAX_PATH_DISPLAY_LENGTH = 3;
+
 export const createTripInfoTemplate = (tripPoints) => {
-  const MAX_PATH_DISPLAY_LENGTH = 3;
   let totalCost = 0;
 
   const generateTripInfoDatesContent = () => {

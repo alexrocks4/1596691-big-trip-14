@@ -7,9 +7,9 @@ import { createTripEventsListItemTemplate } from './view/trip-events-list-item.j
 import { createTripEventEditTemplate } from './view/trip-event-edit.js';
 import { createTripEventTemplate } from './view/trip-event.js';
 import { generateTripPoint } from './mock/trip-point.js';
-import { tripTypes } from './mock/trip-type.js';
+import { TRIP_TYPES } from './mock/trip-type.js';
 import { destinations } from './mock/destination.js';
-import { pointTypeToOffers } from './mock/offer.js';
+import { POINT_TYPE_TO_OFFERS } from './mock/offer.js';
 import dayjs from 'dayjs';
 
 const MAX_EVENTS_COUNT = 3;
@@ -43,17 +43,17 @@ render(tripEventsElement, createTripEventsListTemplate());
 const tripEventsListElement = tripEventsElement.querySelector('.trip-events__list');
 
 const tripEventEditFormOptions = {
-  tripTypes,
+  TRIP_TYPES,
   destinations,
   tripPoint: generateTripPoint(),
-  allOffers: pointTypeToOffers,
+  allOffers: POINT_TYPE_TO_OFFERS,
 };
 render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventEditTemplate(tripEventEditFormOptions)));
 
 const tripEventAddFormOptions = {
-  tripTypes,
+  TRIP_TYPES,
   destinations,
-  allOffers: pointTypeToOffers,
+  allOffers: POINT_TYPE_TO_OFFERS,
 };
 render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventEditTemplate(tripEventAddFormOptions)));
 

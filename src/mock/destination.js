@@ -6,8 +6,8 @@ const MAX_SENTENCES_COUNT = 5;
 const MIN_PICTURES_COUNT = 1;
 const MAX_PICTURES_COUNT = 4;
 
-const pointNames = ['Amsterdam','Chamonix','Geneva','Paris'];
-const textTemplate = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+const POINT_NAMES = ['Amsterdam','Chamonix','Geneva','Paris'];
+const TEXT_TEMPLATE = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra.
 Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.
 Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.
@@ -16,7 +16,7 @@ Sed sed nisi sed augue convallis suscipit in sed felis.
 Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 
 const generateDescription = (sentencesCount) => {
-  return sampleSize(textTemplate.split(/\.\s/), sentencesCount).join('. ') + '.';
+  return sampleSize(TEXT_TEMPLATE.split(/\.\s/), sentencesCount).join('. ') + '.';
 };
 
 const generatePictures = () => {
@@ -40,6 +40,6 @@ const generateDestination = (pointName) => {
   };
 };
 
-const destinations = pointNames.map((name) => generateDestination(name));
+const destinations = POINT_NAMES.map((name) => generateDestination(name));
 
 export { destinations };

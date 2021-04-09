@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 
-export const createTripEventEditTemplate = ({ tripTypes, tripPoint = {}, destinations, allOffers}) => {
-  const { type = tripTypes[0],
+export const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations, allOffers}) => {
+  const { type = TRIP_TYPES[0],
     destination = destinations[0],
     offers: tripPointOffers,
     startDate = dayjs().toDate(),
@@ -16,8 +16,8 @@ export const createTripEventEditTemplate = ({ tripTypes, tripPoint = {}, destina
       </div>`;
   };
 
-  const generateTripTypeListTemplate = (tripTypes) => {
-    return tripTypes.reduce((template, tripType) => template + generateTripTypeItemTemplate(tripType, tripType === type), '');
+  const generateTripTypeListTemplate = (TRIP_TYPES) => {
+    return TRIP_TYPES.reduce((template, tripType) => template + generateTripTypeItemTemplate(tripType, tripType === type), '');
   };
 
   const generateDestinationsDataListTemplate = () => {
@@ -96,7 +96,7 @@ export const createTripEventEditTemplate = ({ tripTypes, tripPoint = {}, destina
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-              ${generateTripTypeListTemplate(tripTypes)}
+              ${generateTripTypeListTemplate(TRIP_TYPES)}
             </fieldset>
           </div>
         </div>

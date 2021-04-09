@@ -1,4 +1,4 @@
-export const pointTypeToOffers = {
+export const POINT_TYPE_TO_OFFERS = {
   taxi: [
     {
       id: 1,

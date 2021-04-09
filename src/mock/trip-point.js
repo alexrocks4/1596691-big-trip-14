@@ -1,7 +1,7 @@
 import { getRandomIntegerInclusive, getRandomArrayElement } from '../util.js';
 import { destinations } from './destination.js';
-import { tripTypes } from './trip-type.js';
-import { pointTypeToOffers } from './offer.js';
+import { TRIP_TYPES } from './trip-type.js';
+import { POINT_TYPE_TO_OFFERS } from './offer.js';
 import dayjs from 'dayjs';
 
 const HOURS_GAP = 24;
@@ -13,7 +13,7 @@ let idsCounter = 1;
 
 const generateTripPointOffers = (tripType) => {
   let result = null;
-  const selectedOffers = pointTypeToOffers[tripType]; // can be undefined if there is no such offers type
+  const selectedOffers = POINT_TYPE_TO_OFFERS[tripType]; // can be undefined if there is no such offers type
 
   if (selectedOffers) {
     const slicedArray = selectedOffers.slice(getRandomIntegerInclusive(0, selectedOffers.length));
@@ -24,7 +24,7 @@ const generateTripPointOffers = (tripType) => {
 };
 
 const generateTripPoint = () => {
-  const tripType = getRandomArrayElement(tripTypes);
+  const tripType = getRandomArrayElement(TRIP_TYPES);
   const startDate = dayjs()
     .add(getRandomIntegerInclusive(-HOURS_GAP, HOURS_GAP), 'hour')
     .toDate();

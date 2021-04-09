@@ -1,4 +1,4 @@
-export const tripTypes = [
+export const TRIP_TYPES = [
   'taxi',
   'bus',
   'train',
