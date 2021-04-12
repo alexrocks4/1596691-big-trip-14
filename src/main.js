@@ -55,10 +55,19 @@ tripPointsSortedByStartDate.forEach((tripPoint) => {
 
   const replaceTripEventToEditForm = () => {
     tripEventListItemElement.replaceChild(tripEventEditFormElement, tripEventElement);
+    document.addEventListener('keydown', onEscKeyDown);
   };
 
   const replaceEditFormToTripEvent = () => {
     tripEventListItemElement.replaceChild(tripEventElement, tripEventEditFormElement);
+    document.removeEventListener('keydown', onEscKeyDown);
+  };
+
+  const onEscKeyDown = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      replaceEditFormToTripEvent();
+    }
   };
 
   tripEventElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
@@ -67,6 +76,10 @@ tripPointsSortedByStartDate.forEach((tripPoint) => {
 
   tripEventEditFormElement.addEventListener('submit', (evt) => {
     evt.preventDefault();
+    replaceEditFormToTripEvent();
+  });
+
+  tripEventEditFormElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
     replaceEditFormToTripEvent();
   });
 
