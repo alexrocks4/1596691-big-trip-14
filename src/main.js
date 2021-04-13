@@ -1,15 +1,16 @@
-import { createSiteNavigationTemplate } from './view/site-navigation.js';
-import { createTripInfoTemplate } from './view/trip-info.js';
-import { createTripFilterTemplate } from './view/trip-filter.js';
-import { createTripSortTemplate } from './view/trip-sort.js';
-import { createTripEventsListTemplate } from './view/trip-events-list.js';
-import { createTripEventsListItemTemplate } from './view/trip-events-list-item.js';
-import { createTripEventEditTemplate } from './view/trip-event-edit.js';
-import { createTripEventTemplate } from './view/trip-event.js';
+import SiteNavigationView from './view/site-navigation.js';
+import TripInfoView from './view/trip-info.js';
+import TripFilterView from './view/trip-filter.js';
+import TripSortView from './view/trip-sort.js';
+import TripEventsListView from './view/trip-events-list.js';
+import TripEventsListItemView from './view/trip-events-list-item.js';
+import TripEventEditView from './view/trip-event-edit.js';
+import TripEventView from './view/trip-event.js';
 import { generateTripPoint } from './mock/trip-point.js';
 import { TRIP_TYPES } from './mock/trip-type.js';
 import { destinations } from './mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from './mock/offer.js';
+import Container from './container.js';
 import dayjs from 'dayjs';
 
 const MAX_EVENTS_COUNT = 3;
@@ -17,15 +18,15 @@ const MAX_EVENTS_COUNT = 3;
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 
 const tripMainElement = document.querySelector('.trip-main');
-const siteNavigationContainerElement = tripMainElement.querySelector('.trip-controls__navigation');
-const tripFilterContainerElement = tripMainElement.querySelector('.trip-controls__filters');
-const tripEventsElement = document.querySelector('.trip-events');
 
-const render = (container, template, place = 'beforeend') => {
-  if (container) {
-    container.insertAdjacentHTML(place, template);
-  }
-};
+const tripEventsListComponent = new TripEventsListView();
+const tripSortComponent = new TripSortView();
+
+const siteNavigationContainer = new Container(tripMainElement.querySelector('.trip-controls__navigation'));
+const tripFilterContainer = new Container(tripMainElement.querySelector('.trip-controls__filters'));
+const tripMainContainer = new Container(tripMainElement);
+const tripEventsContainer = new Container(document.querySelector('.trip-events'));
+const tripEventsListContainer = new Container(tripEventsListComponent.getElement());
 
 const sortTripPointsByStartDate = (tripPoints) => {
   return tripPoints
@@ -35,32 +36,42 @@ const sortTripPointsByStartDate = (tripPoints) => {
 
 const tripPointsSortedByStartDate = sortTripPointsByStartDate(tripPoints);
 
-render(tripMainElement, createTripInfoTemplate(tripPointsSortedByStartDate), 'afterbegin');
-render(siteNavigationContainerElement, createSiteNavigationTemplate());
-render(tripFilterContainerElement, createTripFilterTemplate());
-render(tripEventsElement, createTripSortTemplate());
-render(tripEventsElement, createTripEventsListTemplate());
-const tripEventsListElement = tripEventsElement.querySelector('.trip-events__list');
+tripMainContainer.prependElement(new TripInfoView(tripPointsSortedByStartDate).getElement());
+siteNavigationContainer.appendElement(new SiteNavigationView().getElement());
+tripFilterContainer.appendElement(new TripFilterView().getElement());
+tripEventsContainer.appendElement(tripSortComponent.getElement());
 
-const tripEventEditFormOptions = {
-  TRIP_TYPES,
-  destinations,
-  tripPoint: generateTripPoint(),
-  allOffers: POINT_TYPE_TO_OFFERS,
-};
-render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventEditTemplate(tripEventEditFormOptions)));
+tripPointsSortedByStartDate.forEach((tripPoint) => {
+  const tripEventEditFormOptions = {
+    TRIP_TYPES,
+    destinations,
+    tripPoint,
+    allOffers: POINT_TYPE_TO_OFFERS,
+  };
+  const tripEventListItemElement = new TripEventsListItemView().getElement();
+  const tripEventElement = new TripEventView(tripPoint).getElement();
+  const tripEventEditFormElement = new TripEventEditView(tripEventEditFormOptions).getElement();
+  const tripEventListItemContainer = new Container(tripEventListItemElement);
 
-const tripEventAddFormOptions = {
-  TRIP_TYPES,
-  destinations,
-  allOffers: POINT_TYPE_TO_OFFERS,
-};
-render(tripEventsListElement, createTripEventsListItemTemplate(createTripEventEditTemplate(tripEventAddFormOptions)));
+  const replaceTripEventToEditForm = () => {
+    tripEventListItemElement.replaceChild(tripEventEditFormElement, tripEventElement);
+  };
 
-const tripPointsTemplate = tripPointsSortedByStartDate.reduce((generalTemplate, tripPoint) => {
-  return generalTemplate + createTripEventsListItemTemplate(createTripEventTemplate(tripPoint));
-}, '');
+  const replaceEditFormToTripEvent = () => {
+    tripEventListItemElement.replaceChild(tripEventElement, tripEventEditFormElement);
+  };
 
-render(tripEventsListElement, tripPointsTemplate);
+  tripEventElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    replaceTripEventToEditForm();
+  });
 
+  tripEventEditFormElement.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+    replaceEditFormToTripEvent();
+  });
 
+  tripEventListItemContainer.appendElement(tripEventElement);
+  tripEventsListContainer.appendElement(tripEventListItemElement);
+});
+
+tripEventsContainer.appendElement(tripEventsListComponent.getElement());

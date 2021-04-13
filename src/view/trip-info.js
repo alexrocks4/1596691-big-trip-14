@@ -1,8 +1,9 @@
+import { createElement } from '../util.js';
 import dayjs from 'dayjs';
 
 const MAX_PATH_DISPLAY_LENGTH = 3;
 
-export const createTripInfoTemplate = (tripPoints) => {
+const createTripInfoTemplate = (tripPoints) => {
   let totalCost = 0;
 
   const generateTripInfoDatesContent = () => {
@@ -34,8 +35,7 @@ export const createTripInfoTemplate = (tripPoints) => {
     ? `${tripPath[0]} ... ${tripPath[tripPath.length - 1]}`
     : tripPath.join(' &mdash; ');
 
-  return `
-    <section class="trip-main__trip-info  trip-info">
+  return `<section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">
         <h1 class="trip-info__title">${tripPathString}</h1>
 
@@ -47,3 +47,26 @@ export const createTripInfoTemplate = (tripPoints) => {
       </p>
     </section>`;
 };
+
+export default class TripInfo {
+  constructor(tripPoints) {
+    this._element = null;
+    this._tripPoints = tripPoints;
+  }
+
+  getTemplate() {
+    return createTripInfoTemplate(this._tripPoints);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

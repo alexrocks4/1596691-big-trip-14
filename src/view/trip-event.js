@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
+import { createElement } from '../util.js';
 
 const MINUTES_IN_A_DAY = 1440;
 const MINUTES_IN_A_HOUR = 60;
 
-export const createTripEventTemplate = (tripPoint) => {
+const createTripEventTemplate = (tripPoint) => {
   const {
     type,
     destination,
@@ -90,3 +91,26 @@ export const createTripEventTemplate = (tripPoint) => {
       </button>
     </div>`;
 };
+
+export default class TripEvent {
+  constructor(tripPoint) {
+    this._element = null;
+    this._tripPoint = tripPoint;
+  }
+
+  getTemplate() {
+    return createTripEventTemplate(this._tripPoint);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
