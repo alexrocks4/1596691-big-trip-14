@@ -1,5 +1,5 @@
 import sampleSize from 'lodash.samplesize';
-import { getRandomIntegerInclusive } from '../util.js';
+import { getRandomIntegerInclusive } from '../utils/common.js';
 
 const MIN_SENTENCES_COUNT = 1;
 const MAX_SENTENCES_COUNT = 5;
