@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { createElement } from '../util.js';
+import AbstractView from './abstract.js';
 
 const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations, allOffers}) => {
   const { type = TRIP_TYPES[0],
@@ -140,25 +140,13 @@ const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations,
 };
 
 
-export default class TripEventEdit {
+export default class TripEventEdit extends AbstractView {
   constructor(option) {
-    this._element = null;
+    super();
     this._option = option;
   }
 
   getTemplate() {
     return createTripEventEditTemplate(this._option);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

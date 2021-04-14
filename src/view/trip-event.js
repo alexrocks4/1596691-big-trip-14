@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { createElement } from '../util.js';
+import AbstractView from './abstract.js';
 
 const MINUTES_IN_A_DAY = 1440;
 const MINUTES_IN_A_HOUR = 60;
@@ -92,25 +92,13 @@ const createTripEventTemplate = (tripPoint) => {
     </div>`;
 };
 
-export default class TripEvent {
+export default class TripEvent extends AbstractView {
   constructor(tripPoint) {
-    this._element = null;
+    super();
     this._tripPoint = tripPoint;
   }
 
   getTemplate() {
     return createTripEventTemplate(this._tripPoint);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
