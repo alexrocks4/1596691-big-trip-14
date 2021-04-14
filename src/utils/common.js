@@ -11,7 +11,12 @@ const getRandomArrayElement = (elements) => {
   return elements[randomArrayIndex];
 };
 
+const isEscKeyPressed = (evt) => {
+  return evt.key === 'Escape' || evt.key === 'Esc';
+};
+
 export {
   getRandomIntegerInclusive,
-  getRandomArrayElement
+  getRandomArrayElement,
+  isEscKeyPressed
 };

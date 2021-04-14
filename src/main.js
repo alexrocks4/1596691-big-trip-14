@@ -13,6 +13,7 @@ import { TRIP_TYPES } from './mock/trip-type.js';
 import { destinations } from './mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from './mock/offer.js';
 import { sortTripPointsByStartDate } from './utils/trip-point.js';
+import { isEscKeyPressed } from './utils/common.js';
 
 const MAX_EVENTS_COUNT = 3;
 
@@ -42,43 +43,33 @@ if (tripPointsSortedByStartDate.length) {
       tripPoint,
       allOffers: POINT_TYPE_TO_OFFERS,
     };
-    const tripEventListItemElement = new TripEventsListItemView().getElement();
-    const tripEventElement = new TripEventView(tripPoint).getElement();
-    const tripEventEditFormElement = new TripEventEditView(tripEventEditFormOptions).getElement();
-    const tripEventListItemContainer = new Container(tripEventListItemElement);
+    const tripEventListItemComponent = new TripEventsListItemView();
+    const tripEventComponent = new TripEventView(tripPoint);
+    const tripEventEditFormComponent = new TripEventEditView(tripEventEditFormOptions);
+    const tripEventListItemContainer = new Container(tripEventListItemComponent);
 
     const replaceTripEventToEditForm = () => {
-      tripEventListItemContainer.replace(tripEventEditFormElement, tripEventElement);
+      tripEventListItemContainer.replace(tripEventEditFormComponent, tripEventComponent);
       document.addEventListener('keydown', onEscKeyDown);
     };
 
     const replaceEditFormToTripEvent = () => {
-      tripEventListItemContainer.replace(tripEventElement, tripEventEditFormElement);
+      tripEventListItemContainer.replace(tripEventComponent, tripEventEditFormComponent);
       document.removeEventListener('keydown', onEscKeyDown);
     };
 
     const onEscKeyDown = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
+      if (isEscKeyPressed(evt)) {
         evt.preventDefault();
         replaceEditFormToTripEvent();
       }
     };
 
-    tripEventElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceTripEventToEditForm();
-    });
-
-    tripEventEditFormElement.addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceEditFormToTripEvent();
-    });
-
-    tripEventEditFormElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceEditFormToTripEvent();
-    });
-
-    tripEventListItemContainer.append(tripEventElement);
-    tripEventsListContainer.append(tripEventListItemElement);
+    tripEventComponent.setEditClickHandler(() => replaceTripEventToEditForm());
+    tripEventEditFormComponent.setFormSubmitHandler(() => replaceEditFormToTripEvent());
+    tripEventEditFormComponent.setRollupClickHandler(() => replaceEditFormToTripEvent());
+    tripEventListItemContainer.append(tripEventComponent);
+    tripEventsListContainer.append(tripEventListItemComponent);
   });
 
   tripEventsContainer.append(tripEventsListComponent);
