@@ -1,4 +1,4 @@
-import { getRandomIntegerInclusive, getRandomArrayElement } from '../util.js';
+import { getRandomIntegerInclusive, getRandomArrayElement } from '../utils/common.js';
 import { destinations } from './destination.js';
 import { TRIP_TYPES } from './trip-type.js';
 import { POINT_TYPE_TO_OFFERS } from './offer.js';

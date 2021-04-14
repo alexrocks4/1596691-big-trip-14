@@ -1,4 +1,4 @@
-import { createElement } from '../util.js';
+import AbstractView from './abstract.js';
 import dayjs from 'dayjs';
 
 const MAX_PATH_DISPLAY_LENGTH = 3;
@@ -48,25 +48,13 @@ const createTripInfoTemplate = (tripPoints) => {
     </section>`;
 };
 
-export default class TripInfo {
+export default class TripInfo extends AbstractView {
   constructor(tripPoints) {
-    this._element = null;
+    super();
     this._tripPoints = tripPoints;
   }
 
   getTemplate() {
     return createTripInfoTemplate(this._tripPoints);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

@@ -7,12 +7,13 @@ import TripEventsListItemView from './view/trip-events-list-item.js';
 import TripEventEditView from './view/trip-event-edit.js';
 import TripEventView from './view/trip-event.js';
 import NoTripEventView from './view/no-trip-event.js';
-import Container from './container.js';
+import Container from './utils/container.js';
 import { generateTripPoint } from './mock/trip-point.js';
 import { TRIP_TYPES } from './mock/trip-type.js';
 import { destinations } from './mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from './mock/offer.js';
-import { sortTripPointsByStartDate } from './util.js';
+import { sortTripPointsByStartDate } from './utils/trip-point.js';
+import { isEscKeyPressed } from './utils/common.js';
 
 const MAX_EVENTS_COUNT = 3;
 
@@ -24,16 +25,16 @@ const tripEventsContainer = new Container(document.querySelector('.trip-events')
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 const tripPointsSortedByStartDate = sortTripPointsByStartDate(tripPoints);
 
-tripMainContainer.prependElement(new TripInfoView(tripPointsSortedByStartDate).getElement());
-siteNavigationContainer.appendElement(new SiteNavigationView().getElement());
-tripFilterContainer.appendElement(new TripFilterView().getElement());
+tripMainContainer.prepend(new TripInfoView(tripPointsSortedByStartDate));
+siteNavigationContainer.append(new SiteNavigationView());
+tripFilterContainer.append(new TripFilterView());
 
 if (tripPointsSortedByStartDate.length) {
   const tripEventsListComponent = new TripEventsListView();
   const tripSortComponent = new TripSortView();
-  const tripEventsListContainer = new Container(tripEventsListComponent.getElement());
+  const tripEventsListContainer = new Container(tripEventsListComponent);
 
-  tripEventsContainer.appendElement(tripSortComponent.getElement());
+  tripEventsContainer.append(tripSortComponent);
 
   tripPointsSortedByStartDate.forEach((tripPoint) => {
     const tripEventEditFormOptions = {
@@ -42,46 +43,36 @@ if (tripPointsSortedByStartDate.length) {
       tripPoint,
       allOffers: POINT_TYPE_TO_OFFERS,
     };
-    const tripEventListItemElement = new TripEventsListItemView().getElement();
-    const tripEventElement = new TripEventView(tripPoint).getElement();
-    const tripEventEditFormElement = new TripEventEditView(tripEventEditFormOptions).getElement();
-    const tripEventListItemContainer = new Container(tripEventListItemElement);
+    const tripEventListItemComponent = new TripEventsListItemView();
+    const tripEventComponent = new TripEventView(tripPoint);
+    const tripEventEditFormComponent = new TripEventEditView(tripEventEditFormOptions);
+    const tripEventListItemContainer = new Container(tripEventListItemComponent);
 
     const replaceTripEventToEditForm = () => {
-      tripEventListItemElement.replaceChild(tripEventEditFormElement, tripEventElement);
+      tripEventListItemContainer.replace(tripEventEditFormComponent, tripEventComponent);
       document.addEventListener('keydown', onEscKeyDown);
     };
 
     const replaceEditFormToTripEvent = () => {
-      tripEventListItemElement.replaceChild(tripEventElement, tripEventEditFormElement);
+      tripEventListItemContainer.replace(tripEventComponent, tripEventEditFormComponent);
       document.removeEventListener('keydown', onEscKeyDown);
     };
 
     const onEscKeyDown = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
+      if (isEscKeyPressed(evt)) {
         evt.preventDefault();
         replaceEditFormToTripEvent();
       }
     };
 
-    tripEventElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceTripEventToEditForm();
-    });
-
-    tripEventEditFormElement.addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceEditFormToTripEvent();
-    });
-
-    tripEventEditFormElement.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceEditFormToTripEvent();
-    });
-
-    tripEventListItemContainer.appendElement(tripEventElement);
-    tripEventsListContainer.appendElement(tripEventListItemElement);
+    tripEventComponent.setEditClickHandler(() => replaceTripEventToEditForm());
+    tripEventEditFormComponent.setFormSubmitHandler(() => replaceEditFormToTripEvent());
+    tripEventEditFormComponent.setRollupClickHandler(() => replaceEditFormToTripEvent());
+    tripEventListItemContainer.append(tripEventComponent);
+    tripEventsListContainer.append(tripEventListItemComponent);
   });
 
-  tripEventsContainer.appendElement(tripEventsListComponent.getElement());
+  tripEventsContainer.append(tripEventsListComponent);
 } else {
-  tripEventsContainer.appendElement(new NoTripEventView().getElement());
+  tripEventsContainer.append(new NoTripEventView());
 }

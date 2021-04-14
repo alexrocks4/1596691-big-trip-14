@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values
 const getRandomIntegerInclusive = (min, max) => {
   min = Math.ceil(min);
@@ -13,22 +11,12 @@ const getRandomArrayElement = (elements) => {
   return elements[randomArrayIndex];
 };
 
-const createElement = (template) => {
-  const newElement = document.createElement('div');
-  newElement.innerHTML = template;
-
-  return newElement.firstChild;
-};
-
-const sortTripPointsByStartDate = (tripPoints) => {
-  return tripPoints
-    .slice()
-    .sort((pointA, pointB) => dayjs(pointA.startDate).diff(pointB.startDate));
+const isEscKeyPressed = (evt) => {
+  return evt.key === 'Escape' || evt.key === 'Esc';
 };
 
 export {
   getRandomIntegerInclusive,
   getRandomArrayElement,
-  createElement,
-  sortTripPointsByStartDate
+  isEscKeyPressed
 };
