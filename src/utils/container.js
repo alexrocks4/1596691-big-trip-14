@@ -24,4 +24,8 @@ export default class Container {
     const oldElement = this._convertToElement(oldChild);
     this._container.replaceChild(newElement, oldElement);
   }
+
+  contains(instance) {
+    return this._container.contains(this._convertToElement(instance));
+  }
 }

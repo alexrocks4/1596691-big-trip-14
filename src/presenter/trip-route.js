@@ -1,11 +1,14 @@
 import TripEventsListView from '../view/trip-events-list.js';
 import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
+import { updateItem } from '../utils/common.js';
 
 export default class TripRoute {
   constructor(tripEventsContainer = null) {
     this._tripEventsContainer = tripEventsContainer;
     this._tripPointPresenter =  {};
+
+    this._changeTripPoint = this._changeTripPoint.bind(this);
   }
 
   init(tripPoints = []) {
@@ -17,7 +20,7 @@ export default class TripRoute {
   }
 
   _renderTripPoint(tripPoint) {
-    const tripPointPresenter = new TripPointPresenter(this._tripEventsListContainer);
+    const tripPointPresenter = new TripPointPresenter(this._tripEventsListContainer, this._changeTripPoint);
     tripPointPresenter.init(tripPoint);
     this._tripPointPresenter[tripPoint.id] = tripPointPresenter;
   }
@@ -28,5 +31,10 @@ export default class TripRoute {
     });
 
     this._tripEventsContainer.append(this._tripEventsListComponent);
+  }
+
+  _changeTripPoint(newTripPointData) {
+    this._tripPoints = updateItem(this._tripPoints, newTripPointData);
+    this._tripPointPresenter[newTripPointData.id].init(newTripPointData);
   }
 }
