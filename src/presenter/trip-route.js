@@ -9,6 +9,7 @@ export default class TripRoute {
     this._tripPointPresenter =  {};
 
     this._changeTripPoint = this._changeTripPoint.bind(this);
+    this._changeAllTripPointsMode = this._changeAllTripPointsMode.bind(this);
   }
 
   init(tripPoints = []) {
@@ -20,7 +21,7 @@ export default class TripRoute {
   }
 
   _renderTripPoint(tripPoint) {
-    const tripPointPresenter = new TripPointPresenter(this._tripEventsListContainer, this._changeTripPoint);
+    const tripPointPresenter = new TripPointPresenter(this._tripEventsListContainer, this._changeTripPoint, this._changeAllTripPointsMode);
     tripPointPresenter.init(tripPoint);
     this._tripPointPresenter[tripPoint.id] = tripPointPresenter;
   }
@@ -36,5 +37,11 @@ export default class TripRoute {
   _changeTripPoint(newTripPointData) {
     this._tripPoints = updateItem(this._tripPoints, newTripPointData);
     this._tripPointPresenter[newTripPointData.id].init(newTripPointData);
+  }
+
+  _changeAllTripPointsMode() {
+    Object
+      .values(this._tripPointPresenter)
+      .forEach((presenter) => presenter.resetMode());
   }
 }

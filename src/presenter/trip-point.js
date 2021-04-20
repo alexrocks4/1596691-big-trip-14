@@ -7,13 +7,20 @@ import { destinations } from '../mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from '../mock/offer.js';
 import { isEscKeyPressed } from '../utils/common.js';
 
+const Mode = {
+  DEFAULT: 'default',
+  EDITING: 'editing',
+};
+
 export default class TripPoint {
-  constructor(tripEventsListContainer, changeTripPointData) {
+  constructor(tripEventsListContainer, changeTripPointData, changeAllTripPointsMode) {
     this._tripEventsListContainer = tripEventsListContainer;
     this._changeTripPointData = changeTripPointData;
     this._tripEventComponent = null;
     this._tripEventEditFormComponent = null;
     this._tripEventListItemComponent = null;
+    this._mode = Mode.DEFAULT;
+    this._changeAllTripPointsMode = changeAllTripPointsMode;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._handleEditClick = this._handleEditClick.bind(this);
@@ -42,7 +49,11 @@ export default class TripPoint {
     this._tripEventEditFormComponent.setRollupClickHandler(this._handleRollupClick);
     this._tripEventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
 
-    this._tripEventListItemContainer.append(this._tripEventComponent);
+    if (this._mode === Mode.DEFAULT) {
+      this._tripEventListItemContainer.append(this._tripEventComponent);
+    } else if (this._mode === Mode.EDITING) {
+      this._tripEventListItemContainer.append(this._tripEventEditFormComponent);
+    }
 
     if (!this._prevTripEventListItemComponent) {
       this._tripEventsListContainer.append(this._tripEventListItemComponent);
@@ -58,6 +69,12 @@ export default class TripPoint {
     this._prevTripEventListItemComponent.remove();
   }
 
+  resetMode() {
+    if (this._mode === Mode.EDITING) {
+      this._replaceEditFormToTripEvent();
+    }
+  }
+
   _onEscKeyDown(evt) {
     if (isEscKeyPressed(evt)) {
       evt.preventDefault();
@@ -66,13 +83,16 @@ export default class TripPoint {
   }
 
   _replaceTripEventToEditForm() {
+    this._changeAllTripPointsMode();
     this._tripEventListItemContainer.replace(this._tripEventEditFormComponent, this._tripEventComponent);
     document.addEventListener('keydown', this._onEscKeyDown);
+    this._mode = Mode.EDITING;
   }
 
   _replaceEditFormToTripEvent() {
     this._tripEventListItemContainer.replace(this._tripEventComponent, this._tripEventEditFormComponent);
     document.removeEventListener('keydown', this._onEscKeyDown);
+    this._mode = Mode.DEFAULT;
   }
 
   _handleEditClick() {
