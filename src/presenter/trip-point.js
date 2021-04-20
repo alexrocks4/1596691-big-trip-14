@@ -112,7 +112,7 @@ export default class TripPoint {
       {}, this._tripPoint, { isFavorite: !this._tripPoint.isFavorite }));
   }
 
-  _destroy() {
+  destroy() {
     this._tripEventComponent.remove();
     this._tripEventEditFormComponent.remove();
     this._tripEventListItemComponent.remove();
