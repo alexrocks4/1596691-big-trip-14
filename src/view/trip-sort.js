@@ -40,6 +40,11 @@ export default class TripSort extends AbstractView {
     return createTripSortTemplate();
   }
 
+  setSortClickHandler(callback) {
+    this._callback.sortClick = callback;
+    this.getElement().addEventListener('click', this._sortClickHandler);
+  }
+
   _sortClickHandler(evt) {
     if (evt.target.tagName !== 'LABEL') {
       return;
@@ -50,10 +55,5 @@ export default class TripSort extends AbstractView {
     if (evt.target.dataset.sortType) {
       this._callback.sortClick(evt.target.dataset.sortType);
     }
-  }
-
-  setSortClickHandler(callback) {
-    this._callback.sortClick = callback;
-    this.getElement().addEventListener('click', this._sortClickHandler);
   }
 }

@@ -12,7 +12,7 @@ export default class TripRoute {
     this._currentSortType = SortType.DEFAULT;
 
     this._changeTripPoint = this._changeTripPoint.bind(this);
-    this._changeAllTripPointsMode = this._changeAllTripPointsMode.bind(this);
+    this._changeMode = this._changeMode.bind(this);
     this._handleSortClick = this._handleSortClick.bind(this);
   }
 
@@ -20,15 +20,15 @@ export default class TripRoute {
     this._tripPoints = tripPoints.slice().sort(sortStartDateUp);
     this._sourceTripPoints = this._tripPoints.slice();
 
-    this._tripEventsListComponent = new TripEventsListView();
-    this._tripEventsListContainer = new Container(this._tripEventsListComponent);
+    this._listComponent = new TripEventsListView();
+    this._listContainer = new Container(this._listComponent);
 
     this._renderSort();
     this._renderTripPoints();
   }
 
   _renderTripPoint(tripPoint) {
-    const tripPointPresenter = new TripPointPresenter(this._tripEventsListContainer, this._changeTripPoint, this._changeAllTripPointsMode);
+    const tripPointPresenter = new TripPointPresenter(this._listContainer, this._changeTripPoint, this._changeMode);
     tripPointPresenter.init(tripPoint);
     this._tripPointPresenter[tripPoint.id] = tripPointPresenter;
   }
@@ -38,7 +38,7 @@ export default class TripRoute {
       this._renderTripPoint(tripPoint);
     });
 
-    this._tripEventsContainer.append(this._tripEventsListComponent);
+    this._tripEventsContainer.append(this._listComponent);
   }
 
   _renderSort() {
@@ -75,7 +75,7 @@ export default class TripRoute {
     this._tripPointPresenter[newTripPointData.id].init(newTripPointData);
   }
 
-  _changeAllTripPointsMode() {
+  _changeMode() {
     Object
       .values(this._tripPointPresenter)
       .forEach((presenter) => presenter.resetMode());

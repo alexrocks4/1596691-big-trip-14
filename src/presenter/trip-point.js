@@ -13,14 +13,14 @@ const Mode = {
 };
 
 export default class TripPoint {
-  constructor(tripEventsListContainer, changeTripPointData, changeAllTripPointsMode) {
-    this._tripEventsListContainer = tripEventsListContainer;
-    this._changeTripPointData = changeTripPointData;
+  constructor(listContainer, changeData, changeMode) {
+    this._listContainer = listContainer;
+    this._changeData = changeData;
     this._tripEventComponent = null;
-    this._tripEventEditFormComponent = null;
-    this._tripEventListItemComponent = null;
+    this._editFormComponent = null;
+    this._listItemComponent = null;
     this._mode = Mode.DEFAULT;
-    this._changeAllTripPointsMode = changeAllTripPointsMode;
+    this._changeMode = changeMode;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._handleEditClick = this._handleEditClick.bind(this);
@@ -30,43 +30,43 @@ export default class TripPoint {
   }
 
   init(tripPoint) {
-    const tripEventEditFormOptions = {
+    const editFormOptions = {
       TRIP_TYPES,
       destinations,
       tripPoint,
       allOffers: POINT_TYPE_TO_OFFERS,
     };
     this._prevTripEventComponent = this._tripEventComponent;
-    this._prevTripEventEditFormComponent = this._tripEventEditFormComponent;
-    this._prevTripEventListItemComponent = this._tripEventListItemComponent;
+    this._prevEditFormComponent = this._editFormComponent;
+    this._prevlistItemComponent = this._listItemComponent;
     this._tripPoint = tripPoint;
     this._tripEventComponent = new TripEventView(tripPoint);
-    this._tripEventEditFormComponent = new TripEventEditView(tripEventEditFormOptions);
-    this._tripEventListItemComponent = new TripEventsListItemView();
-    this._tripEventListItemContainer = new Container(this._tripEventListItemComponent);
+    this._editFormComponent = new TripEventEditView(editFormOptions);
+    this._listItemComponent = new TripEventsListItemView();
+    this._listItemContainer = new Container(this._listItemComponent);
     this._tripEventComponent.setEditClickHandler(this._handleEditClick);
-    this._tripEventEditFormComponent.setFormSubmitHandler(this._handleFormSubmit);
-    this._tripEventEditFormComponent.setRollupClickHandler(this._handleRollupClick);
+    this._editFormComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._editFormComponent.setRollupClickHandler(this._handleRollupClick);
     this._tripEventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
 
     if (this._mode === Mode.DEFAULT) {
-      this._tripEventListItemContainer.append(this._tripEventComponent);
+      this._listItemContainer.append(this._tripEventComponent);
     } else if (this._mode === Mode.EDITING) {
-      this._tripEventListItemContainer.append(this._tripEventEditFormComponent);
+      this._listItemContainer.append(this._editFormComponent);
     }
 
-    if (!this._prevTripEventListItemComponent) {
-      this._tripEventsListContainer.append(this._tripEventListItemComponent);
+    if (!this._prevlistItemComponent) {
+      this._listContainer.append(this._listItemComponent);
       return;
     }
 
-    if (this._tripEventsListContainer.contains(this._prevTripEventListItemComponent)) {
-      this._tripEventsListContainer.replace(this._tripEventListItemComponent, this._prevTripEventListItemComponent);
+    if (this._listContainer.contains(this._prevlistItemComponent)) {
+      this._listContainer.replace(this._listItemComponent, this._prevlistItemComponent);
     }
 
     this._prevTripEventComponent.remove();
-    this._prevTripEventEditFormComponent.remove();
-    this._prevTripEventListItemComponent.remove();
+    this._prevEditFormComponent.remove();
+    this._prevlistItemComponent.remove();
   }
 
   resetMode() {
@@ -75,22 +75,21 @@ export default class TripPoint {
     }
   }
 
-  _onEscKeyDown(evt) {
-    if (isEscKeyPressed(evt)) {
-      evt.preventDefault();
-      this._replaceEditFormToTripEvent();
-    }
+  destroy() {
+    this._tripEventComponent.remove();
+    this._editFormComponent.remove();
+    this._listItemComponent.remove();
   }
 
   _replaceTripEventToEditForm() {
-    this._changeAllTripPointsMode();
-    this._tripEventListItemContainer.replace(this._tripEventEditFormComponent, this._tripEventComponent);
+    this._changeMode();
+    this._listItemContainer.replace(this._editFormComponent, this._tripEventComponent);
     document.addEventListener('keydown', this._onEscKeyDown);
     this._mode = Mode.EDITING;
   }
 
   _replaceEditFormToTripEvent() {
-    this._tripEventListItemContainer.replace(this._tripEventComponent, this._tripEventEditFormComponent);
+    this._listItemContainer.replace(this._tripEventComponent, this._editFormComponent);
     document.removeEventListener('keydown', this._onEscKeyDown);
     this._mode = Mode.DEFAULT;
   }
@@ -108,13 +107,14 @@ export default class TripPoint {
   }
 
   _handleFavoriteClick() {
-    this._changeTripPointData(Object.assign(
+    this._changeData(Object.assign(
       {}, this._tripPoint, { isFavorite: !this._tripPoint.isFavorite }));
   }
 
-  destroy() {
-    this._tripEventComponent.remove();
-    this._tripEventEditFormComponent.remove();
-    this._tripEventListItemComponent.remove();
+  _onEscKeyDown(evt) {
+    if (isEscKeyPressed(evt)) {
+      evt.preventDefault();
+      this._replaceEditFormToTripEvent();
+    }
   }
 }
