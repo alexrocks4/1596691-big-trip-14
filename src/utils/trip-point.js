@@ -1,9 +1,30 @@
 import dayjs from 'dayjs';
+import { setToInteger } from './common.js';
 
-const sortTripPointsByStartDate = (tripPoints) => {
-  return tripPoints
-    .slice()
-    .sort((pointA, pointB) => dayjs(pointA.startDate).diff(pointB.startDate));
+const sortStartDateUp = (pointA, pointB) => {
+  return dayjs(pointA.startDate).diff(pointB.startDate);
 };
 
-export { sortTripPointsByStartDate };
+const sortPriceDown = (pointA, pointB) => {
+  return setToInteger(pointB.price) - setToInteger(pointA.price);
+};
+
+const sortTimeDown = (pointA, pointB) => {
+  let timeA, timeB = -1;
+
+  if (pointA.startDate && pointA.endDate) {
+    timeA = dayjs(pointA.endDate).diff(pointA.startDate);
+  }
+
+  if (pointB.startDate && pointB.endDate) {
+    timeB = dayjs(pointB.endDate).diff(pointB.startDate);
+  }
+
+  return timeB - timeA;
+};
+
+export {
+  sortStartDateUp,
+  sortPriceDown,
+  sortTimeDown
+};
