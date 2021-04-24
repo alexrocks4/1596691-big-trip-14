@@ -1,7 +1,7 @@
 import Container from '../utils/container.js';
 import TripEventsListItemView from '../view/trip-events-list-item.js';
 import TripEventView from '../view/trip-event.js';
-import TripEventEditView from '../view/trip-event-edit.js';
+import TripEventFormView from '../view/trip-event-form.js';
 import { TRIP_TYPES } from '../mock/trip-type.js';
 import { destinations } from '../mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from '../mock/offer.js';
@@ -41,7 +41,7 @@ export default class TripPoint {
     this._prevlistItemComponent = this._listItemComponent;
     this._tripPoint = tripPoint;
     this._tripEventComponent = new TripEventView(tripPoint);
-    this._editFormComponent = new TripEventEditView(editFormOptions);
+    this._editFormComponent = new TripEventFormView(editFormOptions);
     this._listItemComponent = new TripEventsListItemView();
     this._listItemContainer = new Container(this._listItemComponent);
     this._tripEventComponent.setEditClickHandler(this._handleEditClick);

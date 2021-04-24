@@ -1,7 +1,11 @@
 import dayjs from 'dayjs';
-import AbstractView from './abstract.js';
+import SmartView from './smart.js';
+import { FormMode } from '../utils/trip-event-form.js';
 
-const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations, allOffers}) => {
+const createFormTemplate = (state) => {
+  const { isEditing } = state;
+  const { TRIP_TYPES, tripPoint = {}, destinations, allOffers } = state._data;
+
   const { type = TRIP_TYPES[0],
     destination = destinations[0],
     offers: tripPointOffers,
@@ -127,7 +131,7 @@ const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations,
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__reset-btn" type="reset">${isEditing ? 'Delete' : 'Create'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
@@ -139,17 +143,16 @@ const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations,
     </form>`;
 };
 
-
-export default class TripEventEdit extends AbstractView {
+export default class TripEventForm extends SmartView {
   constructor(option) {
     super();
-    this._option = option;
+    this._state = TripEventForm.parseDataToState(option);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupClickHandler = this._rollupClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createTripEventEditTemplate(this._option);
+    return createFormTemplate(this._state);
   }
 
   setFormSubmitHandler(callback) {
@@ -170,5 +173,16 @@ export default class TripEventEdit extends AbstractView {
   _rollupClickHandler(evt) {
     evt.preventDefault();
     this._callback.rollupClick();
+  }
+
+  static parseDataToState(option) {
+    return {
+      _data: { ...option },
+      isEditing: option.mode === FormMode.EDIT,
+    };
+  }
+
+  static parseStateToData(state) {
+    return { ...state._data };
   }
 }
