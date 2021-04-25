@@ -3,8 +3,8 @@ import SmartView from './smart.js';
 import { FormMode } from '../utils/trip-event-form.js';
 
 const createFormTemplate = (state) => {
-  const { isEditing } = state;
-  const { TRIP_TYPES, tripPoint = {}, destinations, allOffers } = state._data;
+  const { isEditing, isOffersAvailable, isDestinationVisible } = state;
+  const { TRIP_TYPES, tripPoint = {}, destinations, allOffers } = state.data;
 
   const { type = TRIP_TYPES[0],
     destination = destinations[0],
@@ -48,7 +48,7 @@ const createFormTemplate = (state) => {
   };
 
   const generateOffersSectionTemplate = () => {
-    return allOffers[type]
+    return isOffersAvailable
       ? `<section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
@@ -57,10 +57,6 @@ const createFormTemplate = (state) => {
             </div>
           </section>`
       : '';
-  };
-
-  const isDestinationSectionVisible = () => {
-    return destination.description || destination.pictures;
   };
 
   const generateDestinationDescriptionTemplate = () => {
@@ -138,7 +134,7 @@ const createFormTemplate = (state) => {
       </header>
       <section class="event__details">
         ${generateOffersSectionTemplate()}
-        ${isDestinationSectionVisible() ? generateDestinationSectionTemplate() : ''}
+        ${isDestinationVisible ? generateDestinationSectionTemplate() : ''}
       </section>
     </form>`;
 };
@@ -149,10 +145,23 @@ export default class TripEventForm extends SmartView {
     this._state = TripEventForm.parseDataToState(option);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupClickHandler = this._rollupClickHandler.bind(this);
+    this._typeChangeHandler = this._typeChangeHandler.bind(this);
+    this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+    this._setInnerHandlers();
   }
 
   getTemplate() {
     return createFormTemplate(this._state);
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setRollupClickHandler(this._callback.rollupClick);
+  }
+
+  reset(option) {
+    this.updateState(TripEventForm.parseDataToState(option));
   }
 
   setFormSubmitHandler(callback) {
@@ -165,9 +174,14 @@ export default class TripEventForm extends SmartView {
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._rollupClickHandler);
   }
 
+  _setInnerHandlers() {
+    this.getElement().querySelector('.event__type-group').addEventListener('change', this._typeChangeHandler);
+    this.getElement().querySelector('.event__input--destination').addEventListener('change', this._destinationChangeHandler);
+  }
+
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit();
+    this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 
   _rollupClickHandler(evt) {
@@ -175,14 +189,56 @@ export default class TripEventForm extends SmartView {
     this._callback.rollupClick();
   }
 
+  _typeChangeHandler(evt) {
+    if (evt.target.tagName !== 'INPUT') {
+      return;
+    }
+
+    evt.preventDefault();
+
+    this.updateState({
+      isOffersAvailable: !!this._state.data.allOffers[evt.target.value],
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{
+            type: evt.target.value,
+            offers: null,
+          },
+        },
+      },
+    });
+  }
+
+  _destinationChangeHandler(evt) {
+    evt.preventDefault();
+
+    const data = this._state.data;
+    const destination = data.destinations.find((destination) => destination.name === evt.target.value);
+
+    this.updateState({
+      isDestinationVisible: !!destination.description || !!destination.pictures,
+      data: {
+        tripPoint: {
+          ...data.tripPoint,
+          ...{ destination },
+        },
+      },
+    });
+  }
+
   static parseDataToState(option) {
+    const { mode = FormMode.EDIT, tripPoint } = option;
+
     return {
-      _data: { ...option },
-      isEditing: option.mode === FormMode.EDIT,
+      data: { ...option },
+      isEditing: mode === FormMode.EDIT,
+      isOffersAvailable: !!option.allOffers[tripPoint.type],
+      isDestinationVisible: !!tripPoint.destination.description || !!tripPoint.destination.pictures,
     };
   }
 
   static parseStateToData(state) {
-    return { ...state._data };
+    return { ...state.data.tripPoint };
   }
 }

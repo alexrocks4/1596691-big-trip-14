@@ -21,11 +21,14 @@ export default class Smart extends Abstract {
   }
 
   updateState(newState, isRerendering = true) {
-    if (newState) {
+    if (!newState) {
       return;
     }
 
-    this._state = { ...this._state, ...newState };
+    const { data, ...state } = newState;
+
+    this._state = { ...this._state, ...state };
+    this._state.data = { ...this._state.data, ...data};
 
     if (isRerendering) {
       this.rerender();
