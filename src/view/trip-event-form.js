@@ -1,7 +1,11 @@
 import dayjs from 'dayjs';
-import AbstractView from './abstract.js';
+import SmartView from './smart.js';
+import { FormMode } from '../utils/trip-event-form.js';
 
-const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations, allOffers}) => {
+const createFormTemplate = (state) => {
+  const { isEditing, isOffersAvailable, isDestinationVisible } = state;
+  const { TRIP_TYPES, tripPoint = {}, destinations, allOffers } = state.data;
+
   const { type = TRIP_TYPES[0],
     destination = destinations[0],
     offers: tripPointOffers,
@@ -44,7 +48,7 @@ const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations,
   };
 
   const generateOffersSectionTemplate = () => {
-    return allOffers[type]
+    return isOffersAvailable
       ? `<section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
@@ -53,10 +57,6 @@ const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations,
             </div>
           </section>`
       : '';
-  };
-
-  const isDestinationSectionVisible = () => {
-    return destination.description || destination.pictures;
   };
 
   const generateDestinationDescriptionTemplate = () => {
@@ -127,29 +127,41 @@ const createTripEventEditTemplate = ({ TRIP_TYPES, tripPoint = {}, destinations,
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__reset-btn" type="reset">${isEditing ? 'Delete' : 'Create'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
       </header>
       <section class="event__details">
         ${generateOffersSectionTemplate()}
-        ${isDestinationSectionVisible() ? generateDestinationSectionTemplate() : ''}
+        ${isDestinationVisible ? generateDestinationSectionTemplate() : ''}
       </section>
     </form>`;
 };
 
-
-export default class TripEventEdit extends AbstractView {
+export default class TripEventForm extends SmartView {
   constructor(option) {
     super();
-    this._option = option;
+    this._state = TripEventForm.parseDataToState(option);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupClickHandler = this._rollupClickHandler.bind(this);
+    this._typeChangeHandler = this._typeChangeHandler.bind(this);
+    this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+    this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createTripEventEditTemplate(this._option);
+    return createFormTemplate(this._state);
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setRollupClickHandler(this._callback.rollupClick);
+  }
+
+  reset(option) {
+    this.updateState(TripEventForm.parseDataToState(option));
   }
 
   setFormSubmitHandler(callback) {
@@ -162,13 +174,71 @@ export default class TripEventEdit extends AbstractView {
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._rollupClickHandler);
   }
 
+  _setInnerHandlers() {
+    this.getElement().querySelector('.event__type-group').addEventListener('change', this._typeChangeHandler);
+    this.getElement().querySelector('.event__input--destination').addEventListener('change', this._destinationChangeHandler);
+  }
+
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit();
+    this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 
   _rollupClickHandler(evt) {
     evt.preventDefault();
     this._callback.rollupClick();
+  }
+
+  _typeChangeHandler(evt) {
+    if (evt.target.tagName !== 'INPUT') {
+      return;
+    }
+
+    evt.preventDefault();
+
+    this.updateState({
+      isOffersAvailable: !!this._state.data.allOffers[evt.target.value],
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{
+            type: evt.target.value,
+            offers: null,
+          },
+        },
+      },
+    });
+  }
+
+  _destinationChangeHandler(evt) {
+    evt.preventDefault();
+
+    const data = this._state.data;
+    const destination = data.destinations.find((destination) => destination.name === evt.target.value);
+
+    this.updateState({
+      isDestinationVisible: !!destination.description || !!destination.pictures,
+      data: {
+        tripPoint: {
+          ...data.tripPoint,
+          ...{ destination },
+        },
+      },
+    });
+  }
+
+  static parseDataToState(option) {
+    const { mode = FormMode.EDIT, tripPoint } = option;
+
+    return {
+      data: { ...option },
+      isEditing: mode === FormMode.EDIT,
+      isOffersAvailable: !!option.allOffers[tripPoint.type],
+      isDestinationVisible: !!tripPoint.destination.description || !!tripPoint.destination.pictures,
+    };
+  }
+
+  static parseStateToData(state) {
+    return { ...state.data.tripPoint };
   }
 }
