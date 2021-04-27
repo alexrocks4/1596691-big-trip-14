@@ -206,15 +206,19 @@ export default class TripEventForm extends SmartView {
     }
 
     this._startDatePicker = flatpickr(this.getElement().querySelector('#event-start-time-1'), {
+      enableTime: true,
       dateFormat: 'd/m/Y H:i',
       defaultDate: startDate,
       onChange: this._startDateChangeHandler,
+      time_24hr: true,
     });
 
     this._endDatePicker = flatpickr(this.getElement().querySelector('#event-end-time-1'), {
+      enableTime: true,
       dateFormat: 'd/m/Y H:i',
       defaultDate: endDate,
       onChange: this._endDateChangeHandler,
+      time_24hr: true,
     });
   }
 
