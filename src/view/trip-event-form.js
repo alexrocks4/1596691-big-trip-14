@@ -1,6 +1,14 @@
-import dayjs from 'dayjs';
 import SmartView from './smart.js';
 import { FormMode } from '../utils/trip-event-form.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+
+const TextColor = {
+  WARNING: 'red',
+};
+const FormErrorMessage = {
+  END_DATE: 'End date must be after start date',
+};
 
 const createFormTemplate = (state) => {
   const { isEditing, isOffersAvailable, isDestinationVisible } = state;
@@ -9,8 +17,6 @@ const createFormTemplate = (state) => {
   const { type = TRIP_TYPES[0],
     destination = destinations[0],
     offers: tripPointOffers,
-    startDate = dayjs().toDate(),
-    endDate = dayjs(startDate).add(1, 'hour'),
     price = 0,
   } = tripPoint;
 
@@ -112,10 +118,10 @@ const createFormTemplate = (state) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs(startDate).format('DD/MM/YY HH:mm')}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dayjs(endDate).format('DD/MM/YY HH:mm')}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -143,11 +149,17 @@ export default class TripEventForm extends SmartView {
   constructor(option) {
     super();
     this._state = TripEventForm.parseDataToState(option);
+    this._startDatePicker = null;
+    this._endDatePicker = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupClickHandler = this._rollupClickHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
     this._setInnerHandlers();
+    this._setDatePicker();
+    this._submitElement = this.getElement().querySelector('.event__save-btn');
   }
 
   getTemplate() {
@@ -158,6 +170,11 @@ export default class TripEventForm extends SmartView {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setRollupClickHandler(this._callback.rollupClick);
+    this._setDatePicker();
+  }
+
+  restoreElements() {
+    this._submitElement = this.getElement().querySelector('.event__save-btn');
   }
 
   reset(option) {
@@ -174,6 +191,52 @@ export default class TripEventForm extends SmartView {
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._rollupClickHandler);
   }
 
+  _setDatePicker() {
+    const startDate = this._state.data.tripPoint.startDate;
+    const endDate = this._state.data.tripPoint.endDate;
+
+    if (this._startDatePicker) {
+      this._startDatePicker.destroy();
+      this._startDatePicker = null;
+    }
+
+    if (this._endDatePicker) {
+      this._endDatePicker.destroy();
+      this._endDatePicker = null;
+    }
+
+    this._startDatePicker = flatpickr(this.getElement().querySelector('#event-start-time-1'), {
+      enableTime: true,
+      dateFormat: 'd/m/Y H:i',
+      defaultDate: startDate,
+      onChange: this._startDateChangeHandler,
+      time_24hr: true,
+    });
+
+    this._endDatePicker = flatpickr(this.getElement().querySelector('#event-end-time-1'), {
+      enableTime: true,
+      dateFormat: 'd/m/Y H:i',
+      defaultDate: endDate,
+      onChange: this._endDateChangeHandler,
+      time_24hr: true,
+    });
+  }
+
+  _clearSubmitError() {
+    this._submitElement.setCustomValidity('');
+    this._submitElement.reportValidity();
+  }
+
+  _renderEndDateError() {
+    if (this._state.isEndDateValid) {
+      this._clearSubmitError();
+      this._endDatePicker.input.style.color = 'inherit';
+    } else {
+      this._submitElement.setCustomValidity(FormErrorMessage.END_DATE);
+      this._endDatePicker.input.style.color = TextColor.WARNING;
+    }
+  }
+
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._typeChangeHandler);
     this.getElement().querySelector('.event__input--destination').addEventListener('change', this._destinationChangeHandler);
@@ -181,6 +244,14 @@ export default class TripEventForm extends SmartView {
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
+
+    //Notify user if endDate is before startDate
+    if (!this._state.isEndDateValid) {
+      this._submitElement.reportValidity();
+      return;
+    }
+
+    this._clearSubmitError();
     this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 
@@ -227,6 +298,34 @@ export default class TripEventForm extends SmartView {
     });
   }
 
+  _startDateChangeHandler([newStartDate]) {
+    this.updateState({
+      isEndDateValid: TripEventForm.isEndDateValid(newStartDate, this._state.data.tripPoint.endDate),
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{ startDate: newStartDate },
+        },
+      },
+    }, false);
+
+    this._renderEndDateError();
+  }
+
+  _endDateChangeHandler([newEndDate]) {
+    this.updateState({
+      isEndDateValid: TripEventForm.isEndDateValid(this._state.data.tripPoint.startDate, newEndDate),
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{ endDate: newEndDate },
+        },
+      },
+    }, false);
+
+    this._renderEndDateError();
+  }
+
   static parseDataToState(option) {
     const { mode = FormMode.EDIT, tripPoint } = option;
 
@@ -235,10 +334,20 @@ export default class TripEventForm extends SmartView {
       isEditing: mode === FormMode.EDIT,
       isOffersAvailable: !!option.allOffers[tripPoint.type],
       isDestinationVisible: !!tripPoint.destination.description || !!tripPoint.destination.pictures,
+      isEndDateValid: TripEventForm.isEndDateValid(tripPoint.startDate, tripPoint.endDate),
     };
   }
 
   static parseStateToData(state) {
     return { ...state.data.tripPoint };
+  }
+
+  static isEndDateValid(startDate, endDate) {
+    if (!(startDate instanceof Date) || !(endDate instanceof Date)) {
+      new Error('startDate or endDate is not Date objects.');
+      return;
+    }
+
+    return endDate.getTime() >= startDate.getTime();
   }
 }

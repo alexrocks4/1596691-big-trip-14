@@ -13,10 +13,19 @@ export default class Smart extends Abstract {
 
     prevElement.parentNode.replaceChild(newElement, prevElement);
 
+    this.restore();
+  }
+
+  restore() {
     this.restoreHandlers();
+    this.restoreElements();
   }
 
   restoreHandlers() {
+    new Error('Abstract method called!');
+  }
+
+  restoreElements() {
     new Error('Abstract method called!');
   }
 
