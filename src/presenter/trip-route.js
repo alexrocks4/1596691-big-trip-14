@@ -4,10 +4,17 @@ import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
 import { SortType, updateItem } from '../utils/common.js';
 import { sortStartDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
+import TripPointModel from '../model/trip-point.js';
 
 export default class TripRoute {
-  constructor(tripEventsContainer = null) {
+  constructor(tripEventsContainer = null, tripPointModel) {
+    if (!tripPointModel instanceof TripPointModel) {
+      new Error('tripPointModel must be instanceof TripPointModel');
+      return;
+    }
+
     this._tripEventsContainer = tripEventsContainer;
+    this._tripPointModel = tripPointModel;
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
 
@@ -16,7 +23,7 @@ export default class TripRoute {
     this._handleSortClick = this._handleSortClick.bind(this);
   }
 
-  init(tripPoints = []) {
+  init() {
     this._tripPoints = tripPoints.slice().sort(sortStartDateUp);
     this._sourceTripPoints = this._tripPoints.slice();
 
