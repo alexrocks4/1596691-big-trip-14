@@ -16,15 +16,15 @@ const tripMainContainer = new Container(tripMainElement);
 const tripEventsContainer = new Container(document.querySelector('.trip-events'));
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 const tripPointModel = new TripPointModel();
-tripPointModel.set(tripPoints);
+tripPointModel.setPoints(tripPoints);
 
 tripMainContainer.prepend(new TripInfoView(tripPoints));
 siteNavigationContainer.append(new SiteNavigationView());
 tripFilterContainer.append(new TripFilterView());
 
 if (tripPoints.length) {
-  const tripRoutePresenter = new TripRoutePresenter(tripEventsContainer);
-  tripRoutePresenter.init(tripPointModel);
+  const tripRoutePresenter = new TripRoutePresenter(tripEventsContainer, tripPointModel);
+  tripRoutePresenter.init();
 } else {
   tripEventsContainer.append(new NoTripEventView());
 }
