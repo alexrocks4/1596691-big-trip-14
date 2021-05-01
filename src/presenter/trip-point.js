@@ -98,7 +98,8 @@ export default class TripPoint {
     this._replaceTripEventToEditForm();
   }
 
-  _handleFormSubmit() {
+  _handleFormSubmit(newData) {
+    this._changeData(newData);
     this._editFormComponent.reset(this._editFormOptions);
     this._replaceEditFormToTripEvent();
   }

@@ -30,7 +30,7 @@ export default class TripPoint extends Observable {
     this._tripPoints = [
       ...this._tripPoints.slice(0, index),
       { ...this._tripPoints[index], ...data},
-      ...this.tripPoints.slice(index + 1),
+      ...this._tripPoints.slice(index + 1),
     ];
   }
 
