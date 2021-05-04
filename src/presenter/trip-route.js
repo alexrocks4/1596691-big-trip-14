@@ -3,6 +3,7 @@ import TripEventsListView from '../view/trip-events-list.js';
 import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
 import TripPointModel from '../model/trip-point.js';
+import { sortDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
 
 export default class TripRoute {
   constructor(tripEventsContainer = null, tripPointModel) {
@@ -18,17 +19,19 @@ export default class TripRoute {
     //the corrensponding sort method of the tripPointModel
     this._sortTripPoints = this._tripPointModel.sortDateUp;
 
+    this._rerenderTripPoints = this._rerenderTripPoints.bind(this);
     this._changeTripPoint = this._changeTripPoint.bind(this);
     this._changeMode = this._changeMode.bind(this);
-    this._handleSortDateUpClick = this._getSortClickHandler(this._tripPointModel.sortDateUp).bind(this);
-    this._handleSortPriceDownClick = this._getSortClickHandler(this._tripPointModel.sortPriceDown).bind(this);
-    this._handleSortTimeDownClick = this._getSortClickHandler(this._tripPointModel.sortTimeDown).bind(this);
+    this._handleSortDateUpClick = this._getSortClickHandler(sortDateUp).bind(this);
+    this._handleSortPriceDownClick = this._getSortClickHandler(sortPriceDown).bind(this);
+    this._handleSortTimeDownClick = this._getSortClickHandler(sortTimeDown).bind(this);
   }
 
   init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
 
+    this._tripPointModel.addObserver('onSort', this._rerenderTripPoints);
     this._renderSort();
     this._renderTripPoints();
   }
@@ -40,7 +43,7 @@ export default class TripRoute {
   }
 
   _renderTripPoints() {
-    this._sortTripPoints().forEach((tripPoint) => {
+    this._tripPointModel.getPoints().forEach((tripPoint) => {
       this._renderTripPoint(tripPoint);
     });
 
@@ -78,15 +81,13 @@ export default class TripRoute {
       .forEach((presenter) => presenter.resetMode());
   }
 
-  _getSortClickHandler(sortTypeAlgorithm) {
+  _getSortClickHandler(sortAlgorithm) {
     return function() {
-      if (this._sortTripPoints === sortTypeAlgorithm) {
+      if (this._tripPointModel.getSortAlgorithm() === sortAlgorithm) {
         return;
       }
 
-      //Change current sort type
-      this._sortTripPoints = sortTypeAlgorithm;
-      this._rerenderTripPoints();
+      this._tripPointModel.sort(sortAlgorithm);
     };
   }
 }

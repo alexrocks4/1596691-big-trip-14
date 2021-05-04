@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { setToInteger } from './common.js';
 
-const sortStartDateUp = (pointA, pointB) => {
+const sortDateUp = (pointA, pointB) => {
   return dayjs(pointA.startDate).diff(pointB.startDate);
 };
 
@@ -24,7 +24,7 @@ const sortTimeDown = (pointA, pointB) => {
 };
 
 export {
-  sortStartDateUp,
+  sortDateUp,
   sortPriceDown,
   sortTimeDown
 };

@@ -1,14 +1,14 @@
 import Observable from './observable.js';
-import dayjs from 'dayjs';
-import { setToInteger } from '../utils/common.js';
+import { sortDateUp } from '../utils/trip-point.js';
 
 export default class TripPoint extends Observable {
   constructor() {
     super();
+    this._observers.onSort = new Set();
+    this._observers.onFilter = new Set();
+    this._sourceTripPoints = [];
     this._tripPoints = [];
-    this.sortDateUp = this.sortDateUp.bind(this);
-    this.sortPriceDown = this.sortPriceDown.bind(this);
-    this.sortTimeDown = this.sortTimeDown.bind(this);
+    this._currentSortAlgorithm = null;
   }
 
   getPoints() {
@@ -16,7 +16,13 @@ export default class TripPoint extends Observable {
   }
 
   setPoints(tripPoints) {
+    this._sourceTripPoints = tripPoints.slice();
     this._tripPoints = tripPoints.slice();
+  }
+
+  init(tripPoints) {
+    this.setPoints(tripPoints);
+    this.sort(sortDateUp, false);
   }
 
   updatePoint(data) {
@@ -34,31 +40,13 @@ export default class TripPoint extends Observable {
     ];
   }
 
-  sortDateUp() {
-    return this._tripPoints.slice().sort((pointA, pointB) => {
-      return dayjs(pointA.startDate).diff(pointB.startDate);
-    });
+  getSortAlgorithm() {
+    return this._currentSortAlgorithm;
   }
 
-  sortPriceDown() {
-    return this._tripPoints.slice().sort((pointA, pointB) => {
-      return setToInteger(pointB.price) - setToInteger(pointA.price);
-    });
-  }
-
-  sortTimeDown() {
-    return this._tripPoints.slice().sort((pointA, pointB) => {
-      let timeA, timeB = -1;
-
-      if (pointA.startDate && pointA.endDate) {
-        timeA = dayjs(pointA.endDate).diff(pointA.startDate);
-      }
-
-      if (pointB.startDate && pointB.endDate) {
-        timeB = dayjs(pointB.endDate).diff(pointB.startDate);
-      }
-
-      return timeB - timeA;
-    });
+  sort(callback) {
+    this._currentSortAlgorithm = callback;
+    this._tripPoints = this.getPoints().slice().sort(this._currentSortAlgorithm);
+    this._notifyObservers('onSort');
   }
 }

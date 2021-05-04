@@ -16,7 +16,7 @@ const tripMainContainer = new Container(tripMainElement);
 const tripEventsContainer = new Container(document.querySelector('.trip-events'));
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 const tripPointModel = new TripPointModel();
-tripPointModel.setPoints(tripPoints);
+tripPointModel.init(tripPoints);
 
 tripMainContainer.prepend(new TripInfoView(tripPoints));
 siteNavigationContainer.append(new SiteNavigationView());
