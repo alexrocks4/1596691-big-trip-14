@@ -99,9 +99,9 @@ export default class TripPoint {
   }
 
   _handleFormSubmit(newData) {
-    this._changeData(newData);
     this._editFormComponent.reset(this._editFormOptions);
     this._replaceEditFormToTripEvent();
+    this._changeData(newData);
   }
 
   _handleRollupClick() {

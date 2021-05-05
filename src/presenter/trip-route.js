@@ -31,7 +31,9 @@ export default class TripRoute {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
 
+    this._tripPointModel.addObserver('onUpdate', this._rerenderTripPoints);
     this._tripPointModel.addObserver('onSort', this._rerenderTripPoints);
+    this._tripPointModel.addObserver('onFilter', this._rerenderTripPoints);
     this._renderSort();
     this._renderTripPoints();
   }
@@ -72,7 +74,6 @@ export default class TripRoute {
 
   _changeTripPoint(newTripPointData) {
     this._tripPointModel.updatePoint(newTripPointData);
-    this._tripPointPresenter[newTripPointData.id].init(newTripPointData);
   }
 
   _changeMode() {
@@ -87,7 +88,7 @@ export default class TripRoute {
         return;
       }
 
-      this._tripPointModel.sort(sortAlgorithm);
+      this._tripPointModel.sort({ callback: sortAlgorithm });
     };
   }
 }

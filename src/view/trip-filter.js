@@ -22,7 +22,22 @@ const createTripFilterTemplate = () => {
 };
 
 export default class TripFilter extends AbstractView {
+  constructor() {
+    super();
+    this._filterChangeHandler = this._filterChangeHandler.bind(this);
+  }
+
   getTemplate() {
     return createTripFilterTemplate();
+  }
+
+  setFilterChangeHandler(callback) {
+    this._callback.filterChange = callback;
+    this.getElement().addEventListener('click', this._filterChangeHandler);
+  }
+
+  _filterChangeHandler(evt) {
+    evt.preventDefault();
+    this._callback.filterChange(evt.target.value);
   }
 }
