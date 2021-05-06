@@ -6,8 +6,9 @@ import { SortType, updateItem } from '../utils/common.js';
 import { sortStartDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
 
 export default class TripRoute {
-  constructor(tripEventsContainer = null) {
+  constructor(tripEventsContainer = null, tripPointModel) {
     this._tripEventsContainer = tripEventsContainer;
+    this._tripPointModel = tripPointModel;
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
 
@@ -16,15 +17,16 @@ export default class TripRoute {
     this._handleSortClick = this._handleSortClick.bind(this);
   }
 
-  init(tripPoints = []) {
-    this._tripPoints = tripPoints.slice().sort(sortStartDateUp);
-    this._sourceTripPoints = this._tripPoints.slice();
-
+  init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
 
     this._renderSort();
     this._renderTripPoints();
+  }
+
+  _getTripPoints() {
+    return this._sortTripPoints(this._currentSortType);
   }
 
   _renderTripPoint(tripPoint) {
@@ -34,7 +36,7 @@ export default class TripRoute {
   }
 
   _renderTripPoints() {
-    this._tripPoints.forEach((tripPoint) => {
+    this._getTripPoints().forEach((tripPoint) => {
       this._renderTripPoint(tripPoint);
     });
 
@@ -50,16 +52,12 @@ export default class TripRoute {
   _sortTripPoints(sortType) {
     switch (sortType) {
       case SortType.PRICE_DOWN:
-        this._tripPoints.sort(sortPriceDown);
-        break;
+        return this._tripPointModel.getTripPoints().slice().sort(sortPriceDown);
       case SortType.TIME_DOWN:
-        this._tripPoints.sort(sortTimeDown);
-        break;
-      default:
-        this._tripPoints = this._sourceTripPoints.slice();
+        return this._tripPointModel.getTripPoints().slice().sort(sortTimeDown);
     }
 
-    this._currentSortType = sortType;
+    return this._tripPointModel.getTripPoints().slice().sort(sortStartDateUp);
   }
 
   _clearTripPoints() {
@@ -86,7 +84,7 @@ export default class TripRoute {
       return;
     }
 
-    this._sortTripPoints(sortType);
+    this._currentSortType = sortType;
     this._clearTripPoints();
     this._renderTripPoints();
   }
