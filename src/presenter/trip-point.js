@@ -6,6 +6,7 @@ import { TRIP_TYPES } from '../mock/trip-type.js';
 import { destinations } from '../mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from '../mock/offer.js';
 import { isEscKeyPressed } from '../utils/common.js';
+import { UserAction, UpdateType } from '../utils/const.js';
 
 const Mode = {
   DEFAULT: 'default',
@@ -13,9 +14,9 @@ const Mode = {
 };
 
 export default class TripPoint {
-  constructor(listContainer, changeData, changeMode) {
+  constructor(listContainer, handleViewAction, changeMode) {
     this._listContainer = listContainer;
-    this._changeData = changeData;
+    this._handleViewAction = handleViewAction;
     this._tripEventComponent = null;
     this._editFormComponent = null;
     this._listItemComponent = null;
@@ -44,10 +45,10 @@ export default class TripPoint {
     this._editFormComponent = new TripEventFormView(this._editFormOptions);
     this._listItemComponent = new TripEventsListItemView();
     this._listItemContainer = new Container(this._listItemComponent);
-    this._tripEventComponent.setEditClickHandler(this._handleEditClick);
     this._editFormComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._editFormComponent.setRollupClickHandler(this._handleRollupClick);
     this._tripEventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+    this._tripEventComponent.setEditClickHandler(this._handleEditClick);
 
     if (this._mode === Mode.DEFAULT) {
       this._listItemContainer.append(this._tripEventComponent);
@@ -98,9 +99,14 @@ export default class TripPoint {
     this._replaceTripEventToEditForm();
   }
 
-  _handleFormSubmit() {
+  _handleFormSubmit(data) {
     this._editFormComponent.reset(this._editFormOptions);
     this._replaceEditFormToTripEvent();
+    this._handleViewAction(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      data,
+    );
   }
 
   _handleRollupClick() {
@@ -109,8 +115,11 @@ export default class TripPoint {
   }
 
   _handleFavoriteClick() {
-    this._changeData(Object.assign(
-      {}, this._tripPoint, { isFavorite: !this._tripPoint.isFavorite }));
+    this._handleViewAction(
+      UserAction.UPDATE_POINT,
+      UpdateType.PATCH,
+      { ...this._tripPoint, ...{ isFavorite: !this._tripPoint.isFavorite } },
+    );
   }
 
   _onEscKeyDown(evt) {

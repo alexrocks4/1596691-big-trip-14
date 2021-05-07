@@ -2,8 +2,9 @@ import TripSortView from '../view/trip-sort.js';
 import TripEventsListView from '../view/trip-events-list.js';
 import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
-import { SortType, updateItem } from '../utils/common.js';
+import { SortType } from '../utils/common.js';
 import { sortStartDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
+import { UserAction, UpdateType } from '../utils/const.js';
 
 export default class TripRoute {
   constructor(tripEventsContainer = null, tripPointModel) {
@@ -12,9 +13,12 @@ export default class TripRoute {
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
 
-    this._changeTripPoint = this._changeTripPoint.bind(this);
     this._changeMode = this._changeMode.bind(this);
     this._handleSortClick = this._handleSortClick.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+    this._handleViewAction = this._handleViewAction.bind(this);
+
+    this._tripPointModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -30,7 +34,7 @@ export default class TripRoute {
   }
 
   _renderTripPoint(tripPoint) {
-    const tripPointPresenter = new TripPointPresenter(this._listContainer, this._changeTripPoint, this._changeMode);
+    const tripPointPresenter = new TripPointPresenter(this._listContainer, this._handleViewAction, this._changeMode);
     tripPointPresenter.init(tripPoint);
     this._tripPointPresenter[tripPoint.id] = tripPointPresenter;
   }
@@ -43,10 +47,38 @@ export default class TripRoute {
     this._tripEventsContainer.append(this._listComponent);
   }
 
+  _clearTripPoints() {
+    Object
+      .values(this._tripPointPresenter)
+      .forEach((presenter) => presenter.destroy());
+    this._tripPointPresenter = {};
+  }
+
+  _rerenderTripPoints() {
+    this._clearTripPoints();
+    this._renderTripPoints();
+  }
+
   _renderSort() {
-    this._tripSortComponent = new TripSortView();
+    this._tripSortComponent = new TripSortView(this._currentSortType);
     this._tripSortComponent.setSortClickHandler(this._handleSortClick);
     this._tripEventsContainer.append(this._tripSortComponent);
+  }
+
+  _rerenderSort() {
+    this._tripSortComponent.remove();
+    this._renderSort();
+  }
+
+  _rerenderTripRoute({ resetSortType = true }) {
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
+
+    this._rerenderSort();
+    this._rerenderTripPoints();
+
   }
 
   _sortTripPoints(sortType) {
@@ -60,17 +92,29 @@ export default class TripRoute {
     return this._tripPointModel.getTripPoints().slice().sort(sortStartDateUp);
   }
 
-  _clearTripPoints() {
-    Object
-      .values(this._tripPointPresenter)
-      .forEach((presenter) => presenter.destroy());
-    this._tripPointPresenter = {};
+  _handleViewAction(actionType, updateType, update) {
+    switch(actionType) {
+      case UserAction.UPDATE_POINT:
+        this._tripPointModel.updateTripPoint(updateType, update);
+        break;
+      case UserAction.ADD_POINT:
+        this._tripPointModel.addTripPoint(updateType, update);
+        break;
+      case UserAction.DELETE_POINT:
+        this._tripPointModel.deleteTripPoint(updateType, update);
+        break;
+    }
   }
 
-  _changeTripPoint(newTripPointData) {
-    this._tripPoints = updateItem(this._tripPoints, newTripPointData);
-    this._sourceTripPoints = updateItem(this._sourceTripPoints, newTripPointData);
-    this._tripPointPresenter[newTripPointData.id].init(newTripPointData);
+  _handleModelEvent(updateType, data) {
+    switch(updateType) {
+      case UpdateType.PATCH:
+        this._tripPointPresenter[data.id].init(data);
+        break;
+      case UpdateType.MINOR:
+        this._rerenderTripRoute();
+        break;
+    }
   }
 
   _changeMode() {
@@ -85,7 +129,6 @@ export default class TripRoute {
     }
 
     this._currentSortType = sortType;
-    this._clearTripPoints();
-    this._renderTripPoints();
+    this._rerenderTripRoute({ resetSortType: false });
   }
 }
