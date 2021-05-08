@@ -70,7 +70,7 @@ export default class TripRoute {
     this._renderSort();
   }
 
-  _rerenderTripRoute({ resetSortType = true }) {
+  _rerenderTripRoute({ resetSortType = false } = {}) {
 
     if (resetSortType) {
       this._currentSortType = SortType.DEFAULT;
@@ -129,6 +129,6 @@ export default class TripRoute {
     }
 
     this._currentSortType = sortType;
-    this._rerenderTripRoute({ resetSortType: false });
+    this._rerenderTripRoute();
   }
 }

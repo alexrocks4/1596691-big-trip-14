@@ -28,6 +28,8 @@ export default class TripPoint {
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleRollupClick = this._handleRollupClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleDelete = this._handleDelete.bind(this);
+
   }
 
   init(tripPoint) {
@@ -47,6 +49,7 @@ export default class TripPoint {
     this._listItemContainer = new Container(this._listItemComponent);
     this._editFormComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._editFormComponent.setRollupClickHandler(this._handleRollupClick);
+    this._editFormComponent.setDeleteClickHandler(this._handleDelete);
     this._tripEventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._tripEventComponent.setEditClickHandler(this._handleEditClick);
 
@@ -106,6 +109,14 @@ export default class TripPoint {
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
       data,
+    );
+  }
+
+  _handleDelete() {
+    this._handleViewAction(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      this._tripPoint,
     );
   }
 
