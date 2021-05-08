@@ -43,7 +43,7 @@ const createFormTemplate = (state) => {
       const isSelected = tripPointOffers ? tripPointOffers.some((tripPointOffer) => tripPointOffer.id === id) : false;
 
       return template + `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${name}-1" type="checkbox" name="event-offer-${name}" ${isSelected ? 'checked' : ''}>
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${name}-1" type="checkbox" name="event-offer-${name}" ${isSelected ? 'checked' : ''} value="${id}">
           <label class="event__offer-label" for="event-offer-${name}-1">
             <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
@@ -257,6 +257,24 @@ export default class TripEventForm extends SmartView {
     }
   }
 
+  _getCheckedOffers() {
+    const checkedOffers = [];
+    const checkedCheckboxes = this.getElement().querySelectorAll('.event__offer-checkbox:checked');
+    const allOffers = this._state.data.allOffers[this._state.data.tripPoint.type];
+
+    if (allOffers) {
+      checkedCheckboxes.forEach((checkbox) => {
+        const offer = allOffers.find((offer) => offer.id === +checkbox.value);
+
+        if (offer) {
+          checkedOffers.push({ ...offer });
+        }
+      });
+    }
+
+    return checkedOffers.length ? checkedOffers : null;
+  }
+
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._typeChangeHandler);
     this.getElement().querySelector('.event__input--destination').addEventListener('change', this._destinationChangeHandler);
@@ -272,6 +290,17 @@ export default class TripEventForm extends SmartView {
     }
 
     this._clearSubmitError();
+    this.updateState({
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{
+            price: +this.getElement().querySelector('.event__input--price').value,
+            offers: this._getCheckedOffers(),
+          },
+        },
+      },
+    });
     this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 

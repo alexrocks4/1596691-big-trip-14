@@ -7,6 +7,7 @@ import { destinations } from '../mock/destination.js';
 import { POINT_TYPE_TO_OFFERS } from '../mock/offer.js';
 import { isEscKeyPressed } from '../utils/common.js';
 import { UserAction, UpdateType } from '../utils/const.js';
+import { isDatesChanged } from '../utils/trip-point.js';
 
 const Mode = {
   DEFAULT: 'default',
@@ -107,7 +108,7 @@ export default class TripPoint {
     this._replaceEditFormToTripEvent();
     this._handleViewAction(
       UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
+      isDatesChanged(data, this._tripPoint) || data.price !== this._tripPoint.price ? UpdateType.MINOR : UpdateType.PATCH,
       data,
     );
   }

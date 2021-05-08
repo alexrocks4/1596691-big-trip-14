@@ -23,8 +23,13 @@ const sortTimeDown = (pointA, pointB) => {
   return timeB - timeA;
 };
 
+const isDatesChanged = (pointA, pointB) => {
+  return pointA.startDate.getTime() !== pointB.startDate.getTime() || pointA.endDate.getTime() !== pointB.endDate.getTime();
+};
+
 export {
   sortStartDateUp,
   sortPriceDown,
-  sortTimeDown
+  sortTimeDown,
+  isDatesChanged
 };
