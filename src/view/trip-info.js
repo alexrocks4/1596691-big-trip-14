@@ -8,7 +8,7 @@ const createTripInfoTemplate = (tripPoints) => {
 
   const generateTripInfoDatesContent = () => {
     const tripStartDate = dayjs(tripPoints[0].startDate).format('MMM D');
-    const tripEndDate = dayjs(tripPoints[tripPoints.length - 1].startDate).format('MMM D');
+    const tripEndDate = dayjs(tripPoints[tripPoints.length - 1].endDate).format('MMM D');
 
     return `${tripStartDate}&nbsp;&mdash;&nbsp;${tripEndDate}`;
   };

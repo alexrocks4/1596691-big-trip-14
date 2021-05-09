@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { setToInteger } from './common.js';
+import { SortType } from './const.js';
 
 const sortStartDateUp = (pointA, pointB) => {
   return dayjs(pointA.startDate).diff(pointB.startDate);
@@ -23,6 +24,17 @@ const sortTimeDown = (pointA, pointB) => {
   return timeB - timeA;
 };
 
+const sortTripPoints = (sortType, tripPoints) => {
+  switch (sortType) {
+    case SortType.PRICE_DOWN:
+      return tripPoints.slice().sort(sortPriceDown);
+    case SortType.TIME_DOWN:
+      return tripPoints.slice().sort(sortTimeDown);
+    case SortType.DEFAULT:
+      return tripPoints.slice().sort(sortStartDateUp);
+  }
+};
+
 const isDatesChanged = (pointA, pointB) => {
   return pointA.startDate.getTime() !== pointB.startDate.getTime() || pointA.endDate.getTime() !== pointB.endDate.getTime();
 };
@@ -31,5 +43,6 @@ export {
   sortStartDateUp,
   sortPriceDown,
   sortTimeDown,
+  sortTripPoints,
   isDatesChanged
 };

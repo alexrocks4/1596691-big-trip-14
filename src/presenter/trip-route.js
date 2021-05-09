@@ -2,8 +2,8 @@ import TripSortView from '../view/trip-sort.js';
 import TripEventsListView from '../view/trip-events-list.js';
 import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
-import { SortType } from '../utils/common.js';
-import { sortStartDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
+import { SortType } from '../utils/const.js';
+import { sortTripPoints } from '../utils/trip-point.js';
 import { UserAction, UpdateType, FilterType } from '../utils/const.js';
 import { filter } from '../utils/filter.js';
 
@@ -33,7 +33,7 @@ export default class TripRoute {
   }
 
   _getTripPoints() {
-    return this._sortTripPoints(this._currentSortType, this._filterTripPoints());
+    return sortTripPoints(this._currentSortType, this._filterTripPoints());
   }
 
   _renderTripPoint(tripPoint) {
@@ -91,17 +91,6 @@ export default class TripRoute {
     return currentFilter === FilterType.EVERYTHING ? tripPoints : tripPoints.filter(filter[this._filterModel.getFilter()]);
   }
 
-  _sortTripPoints(sortType, tripPoints) {
-    switch (sortType) {
-      case SortType.PRICE_DOWN:
-        return tripPoints.slice().sort(sortPriceDown);
-      case SortType.TIME_DOWN:
-        return tripPoints.slice().sort(sortTimeDown);
-    }
-
-    return tripPoints.slice().sort(sortStartDateUp);
-  }
-
   _handleViewAction(actionType, updateType, update) {
     switch(actionType) {
       case UserAction.UPDATE_POINT:
@@ -123,6 +112,10 @@ export default class TripRoute {
         break;
       case UpdateType.MINOR:
         this._rerenderTripRoute();
+        break;
+      //Sort trip points by default when filter has been changed
+      case UpdateType.FILTER_CHANGED:
+        this._rerenderTripRoute({ resetSortType: true });
         break;
     }
   }

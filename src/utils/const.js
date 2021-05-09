@@ -7,6 +7,7 @@ const UserAction = {
 const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
+  FILTER_CHANGED: 'FILTER_CHANGED',
 };
 
 const FilterType = {
@@ -15,4 +16,10 @@ const FilterType = {
   PAST: 'PAST',
 };
 
-export { UserAction, UpdateType, FilterType };
+const SortType = {
+  DEFAULT: 'default',
+  PRICE_DOWN: 'price-dowm',
+  TIME_DOWN: 'time-down',
+};
+
+export { UserAction, UpdateType, FilterType, SortType };
