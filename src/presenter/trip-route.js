@@ -4,12 +4,14 @@ import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
 import { SortType } from '../utils/common.js';
 import { sortStartDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
-import { UserAction, UpdateType } from '../utils/const.js';
+import { UserAction, UpdateType, FilterType } from '../utils/const.js';
+import { filter } from '../utils/filter.js';
 
 export default class TripRoute {
-  constructor(tripEventsContainer = null, tripPointModel) {
+  constructor(tripEventsContainer = null, tripPointModel, filterModel) {
     this._tripEventsContainer = tripEventsContainer;
     this._tripPointModel = tripPointModel;
+    this._filterModel = filterModel;
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
 
@@ -19,6 +21,7 @@ export default class TripRoute {
     this._handleViewAction = this._handleViewAction.bind(this);
 
     this._tripPointModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -30,7 +33,7 @@ export default class TripRoute {
   }
 
   _getTripPoints() {
-    return this._sortTripPoints(this._currentSortType);
+    return this._sortTripPoints(this._currentSortType, this._filterTripPoints());
   }
 
   _renderTripPoint(tripPoint) {
@@ -81,15 +84,22 @@ export default class TripRoute {
 
   }
 
-  _sortTripPoints(sortType) {
+  _filterTripPoints() {
+    const currentFilter = this._filterModel.getFilter();
+    const tripPoints = this._tripPointModel.getTripPoints();
+
+    return currentFilter === FilterType.EVERYTHING ? tripPoints : tripPoints.filter(filter[this._filterModel.getFilter()]);
+  }
+
+  _sortTripPoints(sortType, tripPoints) {
     switch (sortType) {
       case SortType.PRICE_DOWN:
-        return this._tripPointModel.getTripPoints().slice().sort(sortPriceDown);
+        return tripPoints.slice().sort(sortPriceDown);
       case SortType.TIME_DOWN:
-        return this._tripPointModel.getTripPoints().slice().sort(sortTimeDown);
+        return tripPoints.slice().sort(sortTimeDown);
     }
 
-    return this._tripPointModel.getTripPoints().slice().sort(sortStartDateUp);
+    return tripPoints.slice().sort(sortStartDateUp);
   }
 
   _handleViewAction(actionType, updateType, update) {

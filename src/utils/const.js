@@ -9,4 +9,10 @@ const UpdateType = {
   MINOR: 'MINOR',
 };
 
-export { UserAction, UpdateType };
+const FilterType = {
+  EVERYTHING: 'EVERYTHING',
+  FUTURE: 'FUTURE',
+  PAST: 'PAST',
+};
+
+export { UserAction, UpdateType, FilterType };
