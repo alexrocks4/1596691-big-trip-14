@@ -158,6 +158,8 @@ export default class TripEventForm extends SmartView {
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+    this._priceChangeHandler = this._priceChangeHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._setInnerHandlers();
     this._setDatePicker();
     this._submitElement = this.getElement().querySelector('.event__save-btn');
@@ -279,6 +281,11 @@ export default class TripEventForm extends SmartView {
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._typeChangeHandler);
     this.getElement().querySelector('.event__input--destination').addEventListener('change', this._destinationChangeHandler);
+    this.getElement().querySelector('.event__input--price').addEventListener('change', this._priceChangeHandler);
+
+    if(this._state.isOffersAvailable) {
+      this.getElement().querySelector('.event__section--offers').addEventListener('change', this._offersChangeHandler);
+    }
   }
 
   _formSubmitHandler(evt) {
@@ -291,17 +298,6 @@ export default class TripEventForm extends SmartView {
     }
 
     this._clearSubmitError();
-    this.updateState({
-      data: {
-        tripPoint: {
-          ...this._state.data.tripPoint,
-          ...{
-            price: +this.getElement().querySelector('.event__input--price').value,
-            offers: this._getCheckedOffers(),
-          },
-        },
-      },
-    });
     this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 
@@ -342,6 +338,11 @@ export default class TripEventForm extends SmartView {
     const data = this._state.data;
     const destination = data.destinations.find((destination) => destination.name === evt.target.value);
 
+    if (!destination) {
+      new Error(`No such destination ${evt.target.value}!`);
+      return;
+    }
+
     this.updateState({
       isDestinationVisible: !!destination.description || !!destination.pictures,
       data: {
@@ -379,6 +380,43 @@ export default class TripEventForm extends SmartView {
     }, false);
 
     this._renderEndDateError();
+  }
+
+  _priceChangeHandler(evt) {
+    evt.preventDefault();
+
+    const price = parseInt(evt.target.value, 10);
+
+    if (!(Number.isInteger(price) && price > 0)) {
+      evt.target.setCustomValidity('Price must be integer greater than 0!');
+      evt.target.reportValidity();
+      return;
+    }
+
+    evt.target.setCustomValidity('');
+    evt.target.reportValidity();
+
+    this.updateState({
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{ price },
+        },
+      },
+    });
+  }
+
+  _offersChangeHandler(evt) {
+    evt.preventDefault();
+
+    this.updateState({
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{ offers: this._getCheckedOffers() },
+        },
+      },
+    });
   }
 
   static parseDataToState(option) {

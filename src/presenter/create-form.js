@@ -72,7 +72,6 @@ export default class CreateForm {
       UpdateType.MINOR,
       data,
     );
-    console.log(data);
   }
 
   _handleRollupClick() {
