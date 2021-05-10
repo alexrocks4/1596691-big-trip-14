@@ -27,7 +27,10 @@ export default class Abstract {
   }
 
   remove() {
-    this._element.remove();
+    if (this._element) {
+      this._element.remove();
+    }
+
     this.removeElement();
   }
 }

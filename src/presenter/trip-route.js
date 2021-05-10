@@ -6,6 +6,7 @@ import { SortType } from '../utils/const.js';
 import { sortTripPoints } from '../utils/trip-point.js';
 import { UserAction, UpdateType, FilterType } from '../utils/const.js';
 import { filter } from '../utils/filter.js';
+import CreateFormPresenter from './create-form.js';
 
 export default class TripRoute {
   constructor(tripEventsContainer = null, tripPointModel, filterModel) {
@@ -14,22 +15,36 @@ export default class TripRoute {
     this._filterModel = filterModel;
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
+    this._createFormPresenter = null;
 
     this._changeMode = this._changeMode.bind(this);
     this._handleSortClick = this._handleSortClick.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
-
-    this._tripPointModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
-
+    this._filterModel.updateFilter(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
+    this._tripPointModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
     this._renderSort();
     this._renderTripPoints();
+  }
+
+  destroy() {
+    this._clearTripPoints();
+    this._tripSortComponent.remove();
+    this._listComponent.remove();
+    this._currentSortType = SortType.DEFAULT;
+    this._tripPointModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+  }
+
+  createTripPoint(callback) {
+    this._createFormPresenter = new CreateFormPresenter(this._listContainer, this._handleViewAction);
+    this._createFormPresenter.init(callback);
   }
 
   _getTripPoints() {
@@ -124,6 +139,10 @@ export default class TripRoute {
     Object
       .values(this._tripPointPresenter)
       .forEach((presenter) => presenter.resetMode());
+
+    if (this._createFormPresenter) {
+      this._createFormPresenter.destroy();
+    }
   }
 
   _handleSortClick(sortType) {

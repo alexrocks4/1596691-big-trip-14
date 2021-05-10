@@ -22,4 +22,15 @@ const SortType = {
   TIME_DOWN: 'time-down',
 };
 
-export { UserAction, UpdateType, FilterType, SortType };
+const SiteMenu = {
+  TABLE: 'TABLE',
+  STATS: 'STATS',
+};
+
+export {
+  UserAction,
+  UpdateType,
+  FilterType,
+  SortType,
+  SiteMenu
+};

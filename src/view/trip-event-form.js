@@ -133,7 +133,7 @@ const createFormTemplate = (state) => {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${isEditing ? 'Delete' : 'Create'}</button>
+        <button class="event__reset-btn" type="reset">${isEditing ? 'Delete' : 'Cancel'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
@@ -152,7 +152,7 @@ export default class TripEventForm extends SmartView {
     this._startDatePicker = null;
     this._endDatePicker = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
-    this._deleteClickHandler = this._deleteClickHandler.bind(this);
+    this._resetClickHandler = this._resetClickHandler.bind(this);
     this._rollupClickHandler = this._rollupClickHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
@@ -185,6 +185,7 @@ export default class TripEventForm extends SmartView {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setRollupClickHandler(this._callback.rollupClick);
+    this.setResetClickHandler(this._callback.resetClick);
     this._setDatePicker();
   }
 
@@ -206,9 +207,9 @@ export default class TripEventForm extends SmartView {
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._rollupClickHandler);
   }
 
-  setDeleteClickHandler(callback) {
-    this._callback.deleteClick = callback;
-    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._deleteClickHandler);
+  setResetClickHandler(callback) {
+    this._callback.resetClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._resetClickHandler);
   }
 
   _setDatePicker() {
@@ -304,9 +305,9 @@ export default class TripEventForm extends SmartView {
     this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 
-  _deleteClickHandler(evt) {
+  _resetClickHandler(evt) {
     evt.preventDefault();
-    this._callback.deleteClick();
+    this._callback.resetClick();
   }
 
   _rollupClickHandler(evt) {

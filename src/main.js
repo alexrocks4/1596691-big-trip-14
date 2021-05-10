@@ -11,6 +11,7 @@ import InfoPresenter from './presenter/info.js';
 const MAX_EVENTS_COUNT = 20;
 
 const tripMainElement = document.querySelector('.trip-main');
+const createTripPointElement = tripMainElement.querySelector('.trip-main__event-add-btn');
 const siteNavigationContainer = new Container(tripMainElement.querySelector('.trip-controls__navigation'));
 const tripFilterContainer = new Container(tripMainElement.querySelector('.trip-controls__filters'));
 const tripMainContainer = new Container(tripMainElement);
@@ -18,17 +19,32 @@ const tripEventsContainer = new Container(document.querySelector('.trip-events')
 const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 const tripPointModel = new TripPointModel();
 const filterModel = new FilterModel();
+const tripRoutePresenter = new TripRoutePresenter(tripEventsContainer, tripPointModel, filterModel);
 const filterPresenter = new FilterPresenter(tripFilterContainer, filterModel, tripPointModel);
 const infoPresenter = new InfoPresenter(tripMainContainer, tripPointModel);
-tripPointModel.setTripPoints(tripPoints);
 
+tripPointModel.setTripPoints(tripPoints);
 infoPresenter.init();
 siteNavigationContainer.append(new SiteNavigationView());
 filterPresenter.init();
 
 if (tripPoints.length) {
-  const tripRoutePresenter = new TripRoutePresenter(tripEventsContainer, tripPointModel, filterModel);
   tripRoutePresenter.init();
 } else {
   tripEventsContainer.append(new NoTripEventView());
 }
+
+const handleCreateFormClose = () => {
+  createTripPointElement.disabled = false;
+};
+
+const handleCreateTripPointClick = (evt) => {
+  //TODO - Close Statistic
+  //Show TripRoute(reset filtering and sorting)
+  tripRoutePresenter.destroy();
+  tripRoutePresenter.init();
+  tripRoutePresenter.createTripPoint(handleCreateFormClose);
+  evt.target.disabled = true;
+};
+
+createTripPointElement.addEventListener('click', handleCreateTripPointClick);
