@@ -340,9 +340,13 @@ export default class TripEventForm extends SmartView {
     const destination = data.destinations.find((destination) => destination.name === evt.target.value);
 
     if (!destination) {
-      new Error(`No such destination ${evt.target.value}!`);
+      evt.target.setCustomValidity('No such destination!');
+      evt.target.reportValidity();
       return;
     }
+
+    evt.target.setCustomValidity('');
+    evt.target.reportValidity();
 
     this.updateState({
       isDestinationVisible: !!destination.description || !!destination.pictures,
