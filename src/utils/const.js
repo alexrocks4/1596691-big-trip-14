@@ -23,8 +23,8 @@ const SortType = {
 };
 
 const SiteMenu = {
-  TABLE: 'TABLE',
-  STATS: 'STATS',
+  TABLE: 'table',
+  STATS: 'stats',
 };
 
 export {

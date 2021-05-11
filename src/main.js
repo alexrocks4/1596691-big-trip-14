@@ -7,8 +7,9 @@ import TripPointModel from './model/trip-point.js';
 import FilterModel from './model/filter.js';
 import FilterPresenter from './presenter/filter.js';
 import InfoPresenter from './presenter/info.js';
+import { SiteMenu } from './utils/const.js';
 
-const MAX_EVENTS_COUNT = 20;
+const MAX_EVENTS_COUNT = 4;
 
 const tripMainElement = document.querySelector('.trip-main');
 const createTripPointElement = tripMainElement.querySelector('.trip-main__event-add-btn');
@@ -22,10 +23,43 @@ const filterModel = new FilterModel();
 const tripRoutePresenter = new TripRoutePresenter(tripEventsContainer, tripPointModel, filterModel);
 const filterPresenter = new FilterPresenter(tripFilterContainer, filterModel, tripPointModel);
 const infoPresenter = new InfoPresenter(tripMainContainer, tripPointModel);
+const siteNavigationComponent = new SiteNavigationView();
+
+const handleNavigationClick = (menuItem) => {
+  switch(menuItem) {
+    case SiteMenu.TABLE:
+      //Hide Stats
+      //Show route
+      tripRoutePresenter.init();
+      //Activate New Button
+      createTripPointElement.disabled = false;
+      break;
+    case SiteMenu.STATS:
+      //Hide Table
+      tripRoutePresenter.destroy();
+      //Deactivate New Button
+      createTripPointElement.disabled = true;
+      break;
+  }
+};
+
+const handleCreateFormClose = () => {
+  createTripPointElement.disabled = false;
+};
+
+const handleCreateTripPointClick = (evt) => {
+  tripRoutePresenter.destroy();
+  tripRoutePresenter.init();
+  tripRoutePresenter.createTripPoint(handleCreateFormClose);
+  evt.target.disabled = true;
+};
+
+siteNavigationComponent.setNavigationClickHandler(handleNavigationClick);
+createTripPointElement.addEventListener('click', handleCreateTripPointClick);
 
 tripPointModel.setTripPoints(tripPoints);
 infoPresenter.init();
-siteNavigationContainer.append(new SiteNavigationView());
+siteNavigationContainer.append(siteNavigationComponent);
 filterPresenter.init();
 
 if (tripPoints.length) {
@@ -33,18 +67,3 @@ if (tripPoints.length) {
 } else {
   tripEventsContainer.append(new NoTripEventView());
 }
-
-const handleCreateFormClose = () => {
-  createTripPointElement.disabled = false;
-};
-
-const handleCreateTripPointClick = (evt) => {
-  //TODO - Close Statistic
-  //Show TripRoute(reset filtering and sorting)
-  tripRoutePresenter.destroy();
-  tripRoutePresenter.init();
-  tripRoutePresenter.createTripPoint(handleCreateFormClose);
-  evt.target.disabled = true;
-};
-
-createTripPointElement.addEventListener('click', handleCreateTripPointClick);
