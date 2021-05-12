@@ -1,6 +1,6 @@
 import SiteNavigationView from './view/site-navigation.js';
 import NoTripEventView from './view/no-trip-event.js';
-import StatsView from './view/stats.js';
+import StatsView from './view/statistic.js';
 import Container from './utils/container.js';
 import { generateTripPoint } from './mock/trip-point.js';
 import TripRoutePresenter from './presenter/trip-route.js';
@@ -35,7 +35,7 @@ const infoPresenter = new InfoPresenter(tripMainContainer, tripPointModel);
 
 //Views
 const siteNavigationComponent = new SiteNavigationView();
-const statsComponent = new StatsView();
+const statsComponent = new StatsView(tripPointModel.getTripPoints());
 
 const handleNavigationClick = (menuItem) => {
   switch(menuItem) {
@@ -53,6 +53,8 @@ const handleNavigationClick = (menuItem) => {
       //Deactivate New Button
       createTripPointElement.disabled = true;
       //Render Stats
+      statsComponent.updateTripPoints(tripPointModel.getTripPoints());
+      statsComponent.renderCharts();
       statsContainer.append(statsComponent);
       break;
   }
