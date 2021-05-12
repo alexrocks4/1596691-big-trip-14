@@ -1,9 +1,3 @@
-const SortType = {
-  DEFAULT: 'default',
-  PRICE_DOWN: 'price-dowm',
-  TIME_DOWN: 'time-down',
-};
-
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#getting_a_random_integer_between_two_values
 const getRandomIntegerInclusive = (min, max) => {
   min = Math.ceil(min);
@@ -21,20 +15,6 @@ const isEscKeyPressed = (evt) => {
   return evt.key === 'Escape' || evt.key === 'Esc';
 };
 
-const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
-};
-
 const setToInteger = (value) => {
   value = parseInt(value);
 
@@ -45,7 +25,5 @@ export {
   getRandomIntegerInclusive,
   getRandomArrayElement,
   isEscKeyPressed,
-  updateItem,
-  SortType,
   setToInteger
 };

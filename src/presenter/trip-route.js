@@ -2,64 +2,67 @@ import TripSortView from '../view/trip-sort.js';
 import TripEventsListView from '../view/trip-events-list.js';
 import Container from '../utils/container.js';
 import TripPointPresenter from './trip-point.js';
-import { SortType, updateItem } from '../utils/common.js';
-import { sortStartDateUp, sortPriceDown, sortTimeDown } from '../utils/trip-point.js';
+import { SortType } from '../utils/const.js';
+import { sortTripPoints } from '../utils/trip-point.js';
+import { UserAction, UpdateType, FilterType } from '../utils/const.js';
+import { filter } from '../utils/filter.js';
+import CreateFormPresenter from './create-form.js';
 
 export default class TripRoute {
-  constructor(tripEventsContainer = null) {
+  constructor(tripEventsContainer = null, tripPointModel, filterModel) {
     this._tripEventsContainer = tripEventsContainer;
+    this._tripPointModel = tripPointModel;
+    this._filterModel = filterModel;
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
+    this._createFormPresenter = null;
 
-    this._changeTripPoint = this._changeTripPoint.bind(this);
     this._changeMode = this._changeMode.bind(this);
     this._handleSortClick = this._handleSortClick.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+    this._handleViewAction = this._handleViewAction.bind(this);
   }
 
-  init(tripPoints = []) {
-    this._tripPoints = tripPoints.slice().sort(sortStartDateUp);
-    this._sourceTripPoints = this._tripPoints.slice();
-
+  init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
-
+    this._filterModel.updateFilter(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
+    this._tripPointModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
     this._renderSort();
     this._renderTripPoints();
   }
 
+  destroy() {
+    this._clearTripPoints();
+    this._tripSortComponent.remove();
+    this._listComponent.remove();
+    this._currentSortType = SortType.DEFAULT;
+    this._tripPointModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+  }
+
+  createTripPoint(callback) {
+    this._createFormPresenter = new CreateFormPresenter(this._listContainer, this._handleViewAction);
+    this._createFormPresenter.init(callback);
+  }
+
+  _getTripPoints() {
+    return sortTripPoints(this._currentSortType, this._filterTripPoints());
+  }
+
   _renderTripPoint(tripPoint) {
-    const tripPointPresenter = new TripPointPresenter(this._listContainer, this._changeTripPoint, this._changeMode);
+    const tripPointPresenter = new TripPointPresenter(this._listContainer, this._handleViewAction, this._changeMode);
     tripPointPresenter.init(tripPoint);
     this._tripPointPresenter[tripPoint.id] = tripPointPresenter;
   }
 
   _renderTripPoints() {
-    this._tripPoints.forEach((tripPoint) => {
+    this._getTripPoints().forEach((tripPoint) => {
       this._renderTripPoint(tripPoint);
     });
 
     this._tripEventsContainer.append(this._listComponent);
-  }
-
-  _renderSort() {
-    this._tripSortComponent = new TripSortView();
-    this._tripSortComponent.setSortClickHandler(this._handleSortClick);
-    this._tripEventsContainer.append(this._tripSortComponent);
-  }
-
-  _sortTripPoints(sortType) {
-    switch (sortType) {
-      case SortType.PRICE_DOWN:
-        this._tripPoints.sort(sortPriceDown);
-        break;
-      case SortType.TIME_DOWN:
-        this._tripPoints.sort(sortTimeDown);
-        break;
-      default:
-        this._tripPoints = this._sourceTripPoints.slice();
-    }
-
-    this._currentSortType = sortType;
   }
 
   _clearTripPoints() {
@@ -69,16 +72,77 @@ export default class TripRoute {
     this._tripPointPresenter = {};
   }
 
-  _changeTripPoint(newTripPointData) {
-    this._tripPoints = updateItem(this._tripPoints, newTripPointData);
-    this._sourceTripPoints = updateItem(this._sourceTripPoints, newTripPointData);
-    this._tripPointPresenter[newTripPointData.id].init(newTripPointData);
+  _rerenderTripPoints() {
+    this._clearTripPoints();
+    this._renderTripPoints();
+  }
+
+  _renderSort() {
+    this._tripSortComponent = new TripSortView(this._currentSortType);
+    this._tripSortComponent.setSortClickHandler(this._handleSortClick);
+    this._tripEventsContainer.append(this._tripSortComponent);
+  }
+
+  _rerenderSort() {
+    this._tripSortComponent.remove();
+    this._renderSort();
+  }
+
+  _rerenderTripRoute({ resetSortType = false } = {}) {
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
+
+    this._rerenderSort();
+    this._rerenderTripPoints();
+
+  }
+
+  _filterTripPoints() {
+    const currentFilter = this._filterModel.getFilter();
+    const tripPoints = this._tripPointModel.getTripPoints();
+
+    return currentFilter === FilterType.EVERYTHING ? tripPoints : tripPoints.filter(filter[this._filterModel.getFilter()]);
+  }
+
+  _handleViewAction(actionType, updateType, update) {
+    switch(actionType) {
+      case UserAction.UPDATE_POINT:
+        this._tripPointModel.updateTripPoint(updateType, update);
+        break;
+      case UserAction.ADD_POINT:
+        this._tripPointModel.addTripPoint(updateType, update);
+        break;
+      case UserAction.DELETE_POINT:
+        this._tripPointModel.deleteTripPoint(updateType, update);
+        break;
+    }
+  }
+
+  _handleModelEvent(updateType, data) {
+    switch(updateType) {
+      case UpdateType.PATCH:
+        this._tripPointPresenter[data.id].init(data);
+        break;
+      case UpdateType.MINOR:
+        this._rerenderTripRoute();
+        break;
+      //Sort trip points by default when filter has been changed
+      case UpdateType.FILTER_CHANGED:
+        this._rerenderTripRoute({ resetSortType: true });
+        break;
+    }
   }
 
   _changeMode() {
     Object
       .values(this._tripPointPresenter)
       .forEach((presenter) => presenter.resetMode());
+
+    if (this._createFormPresenter) {
+      this._createFormPresenter.destroy();
+    }
   }
 
   _handleSortClick(sortType) {
@@ -86,8 +150,7 @@ export default class TripRoute {
       return;
     }
 
-    this._sortTripPoints(sortType);
-    this._clearTripPoints();
-    this._renderTripPoints();
+    this._currentSortType = sortType;
+    this._rerenderTripRoute();
   }
 }

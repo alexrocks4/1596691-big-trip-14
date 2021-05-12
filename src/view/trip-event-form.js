@@ -1,5 +1,6 @@
 import SmartView from './smart.js';
 import { FormMode } from '../utils/trip-event-form.js';
+import he from 'he';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -43,7 +44,7 @@ const createFormTemplate = (state) => {
       const isSelected = tripPointOffers ? tripPointOffers.some((tripPointOffer) => tripPointOffer.id === id) : false;
 
       return template + `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${name}-1" type="checkbox" name="event-offer-${name}" ${isSelected ? 'checked' : ''}>
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${name}-1" type="checkbox" name="event-offer-${name}" ${isSelected ? 'checked' : ''} value="${id}">
           <label class="event__offer-label" for="event-offer-${name}-1">
             <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
@@ -112,7 +113,7 @@ const createFormTemplate = (state) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination.name)}" list="destination-list-1">
           ${generateDestinationsDataListTemplate()}
         </div>
 
@@ -129,11 +130,11 @@ const createFormTemplate = (state) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(price.toString())}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${isEditing ? 'Delete' : 'Create'}</button>
+        <button class="event__reset-btn" type="reset">${isEditing ? 'Delete' : 'Cancel'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
@@ -152,11 +153,14 @@ export default class TripEventForm extends SmartView {
     this._startDatePicker = null;
     this._endDatePicker = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._resetClickHandler = this._resetClickHandler.bind(this);
     this._rollupClickHandler = this._rollupClickHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+    this._priceChangeHandler = this._priceChangeHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._setInnerHandlers();
     this._setDatePicker();
     this._submitElement = this.getElement().querySelector('.event__save-btn');
@@ -166,10 +170,25 @@ export default class TripEventForm extends SmartView {
     return createFormTemplate(this._state);
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if (this._startDatePicker) {
+      this._startDatePicker.destroy();
+      this._startDatePicker = null;
+    }
+
+    if (this._endDatePicker) {
+      this._endDatePicker.destroy();
+      this._endDatePicker = null;
+    }
+  }
+
   restoreHandlers() {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setRollupClickHandler(this._callback.rollupClick);
+    this.setResetClickHandler(this._callback.resetClick);
     this._setDatePicker();
   }
 
@@ -189,6 +208,11 @@ export default class TripEventForm extends SmartView {
   setRollupClickHandler(callback) {
     this._callback.rollupClick = callback;
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._rollupClickHandler);
+  }
+
+  setResetClickHandler(callback) {
+    this._callback.resetClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._resetClickHandler);
   }
 
   _setDatePicker() {
@@ -237,9 +261,32 @@ export default class TripEventForm extends SmartView {
     }
   }
 
+  _getCheckedOffers() {
+    const checkedOffers = [];
+    const checkedCheckboxes = this.getElement().querySelectorAll('.event__offer-checkbox:checked');
+    const allOffers = this._state.data.allOffers[this._state.data.tripPoint.type];
+
+    if (allOffers) {
+      checkedCheckboxes.forEach((checkbox) => {
+        const offer = allOffers.find((offer) => offer.id === +checkbox.value);
+
+        if (offer) {
+          checkedOffers.push({ ...offer });
+        }
+      });
+    }
+
+    return checkedOffers.length ? checkedOffers : null;
+  }
+
   _setInnerHandlers() {
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._typeChangeHandler);
     this.getElement().querySelector('.event__input--destination').addEventListener('change', this._destinationChangeHandler);
+    this.getElement().querySelector('.event__input--price').addEventListener('change', this._priceChangeHandler);
+
+    if(this._state.isOffersAvailable) {
+      this.getElement().querySelector('.event__section--offers').addEventListener('change', this._offersChangeHandler);
+    }
   }
 
   _formSubmitHandler(evt) {
@@ -253,6 +300,11 @@ export default class TripEventForm extends SmartView {
 
     this._clearSubmitError();
     this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
+  }
+
+  _resetClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.resetClick();
   }
 
   _rollupClickHandler(evt) {
@@ -286,6 +338,15 @@ export default class TripEventForm extends SmartView {
 
     const data = this._state.data;
     const destination = data.destinations.find((destination) => destination.name === evt.target.value);
+
+    if (!destination) {
+      evt.target.setCustomValidity('No such destination!');
+      evt.target.reportValidity();
+      return;
+    }
+
+    evt.target.setCustomValidity('');
+    evt.target.reportValidity();
 
     this.updateState({
       isDestinationVisible: !!destination.description || !!destination.pictures,
@@ -324,6 +385,43 @@ export default class TripEventForm extends SmartView {
     }, false);
 
     this._renderEndDateError();
+  }
+
+  _priceChangeHandler(evt) {
+    evt.preventDefault();
+
+    const price = parseInt(evt.target.value, 10);
+
+    if (!(Number.isInteger(price) && price > 0)) {
+      evt.target.setCustomValidity('Price must be integer greater than 0!');
+      evt.target.reportValidity();
+      return;
+    }
+
+    evt.target.setCustomValidity('');
+    evt.target.reportValidity();
+
+    this.updateState({
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{ price },
+        },
+      },
+    });
+  }
+
+  _offersChangeHandler(evt) {
+    evt.preventDefault();
+
+    this.updateState({
+      data: {
+        tripPoint: {
+          ...this._state.data.tripPoint,
+          ...{ offers: this._getCheckedOffers() },
+        },
+      },
+    });
   }
 
   static parseDataToState(option) {
