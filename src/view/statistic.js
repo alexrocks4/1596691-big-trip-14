@@ -3,6 +3,9 @@ import { formatDuration } from '../utils/common.js';
 import { MILLISECONDS_IN_MINUTE } from '../utils/const.js';
 import { getChartData, renderChart } from '../utils/statistic.js';
 
+const BAR_HEIGHT = 55;
+const SCALE = 5;
+
 const renderMoneyChart = (ctx, chartData = []) => {
   const options = {
     ctx,
@@ -98,8 +101,6 @@ export default class Stats extends Abstract {
       return;
     }
 
-    const BAR_HEIGHT = 55;
-    const SCALE = 5;
     const chartData = getChartData(this._tripPoints);
 
     this._moneyCtx = this.getElement().querySelector('.statistics__chart--money');
