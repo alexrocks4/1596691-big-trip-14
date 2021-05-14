@@ -11,6 +11,7 @@ Thumbs.db
 # Вспомогательные файлы
 *.log*
 node_modules/
+.http
 
 # Собранные файлы (допишите самостоятельно)
 public/bundle.js

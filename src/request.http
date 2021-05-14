@@ -1,0 +1,10 @@
+GET https://14.ecmascript.pages.academy/big-trip/points HTTP/1.1
+Authorization: Basic Krojhephjiehetug
+
+###
+GET https://14.ecmascript.pages.academy/big-trip/offers HTTP/1.1
+Authorization: Basic Krojhephjiehetug
+
+###
+GET https://14.ecmascript.pages.academy/big-trip/destinations HTTP/1.1
+Authorization: Basic Krojhephjiehetug

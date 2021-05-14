@@ -2,9 +2,6 @@ import Container from '../utils/container.js';
 import TripEventsListItemView from '../view/trip-events-list-item.js';
 import TripEventView from '../view/trip-event.js';
 import TripEventFormView from '../view/trip-event-form.js';
-import { TRIP_TYPES } from '../mock/trip-type.js';
-import { destinations } from '../mock/destination.js';
-import { POINT_TYPE_TO_OFFERS } from '../mock/offer.js';
 import { isEscKeyPressed } from '../utils/common.js';
 import { UserAction, UpdateType } from '../utils/const.js';
 import { isDatesChanged } from '../utils/trip-point.js';
@@ -15,7 +12,14 @@ const Mode = {
 };
 
 export default class TripPoint {
-  constructor(listContainer, handleViewAction, changeMode) {
+  constructor(
+    listContainer,
+    handleViewAction,
+    changeMode,
+    tripTypeModel,
+    destinationModel,
+    offerModel,
+  ) {
     this._listContainer = listContainer;
     this._handleViewAction = handleViewAction;
     this._tripEventComponent = null;
@@ -23,6 +27,9 @@ export default class TripPoint {
     this._listItemComponent = null;
     this._mode = Mode.DEFAULT;
     this._changeMode = changeMode;
+    this._tripTypeModel = tripTypeModel;
+    this._destinationModel = destinationModel;
+    this._offerModel = offerModel;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._handleEditClick = this._handleEditClick.bind(this);
@@ -39,10 +46,10 @@ export default class TripPoint {
     this._prevlistItemComponent = this._listItemComponent;
     this._tripPoint = tripPoint;
     this._editFormOptions = {
-      TRIP_TYPES,
-      destinations,
+      TRIP_TYPES: this._tripTypeModel.getTripTypes(),
+      destinations: this._destinationModel.getDestinations(),
       tripPoint,
-      allOffers: POINT_TYPE_TO_OFFERS,
+      allOffers: this._offerModel.getOffers(),
     };
     this._tripEventComponent = new TripEventView(tripPoint);
     this._editFormComponent = new TripEventFormView(this._editFormOptions);

@@ -6,8 +6,10 @@ export default class TripPoint extends Observable {
     this._tripPoints = [];
   }
 
-  setTripPoints(tripPoints) {
+  setTripPoints(updateType, tripPoints) {
     this._tripPoints = tripPoints;
+
+    this.notifyObservers(updateType);
   }
 
   getTripPoints() {
@@ -54,4 +56,45 @@ export default class TripPoint extends Observable {
     this.notifyObservers(updateType);
   }
 
+  static adaptToModel(tripPoint) {
+    const adaptedData = {
+      ...tripPoint,
+      ...{
+        startDate: new Date(tripPoint.date_from),
+        endDate: new Date(tripPoint.date_to),
+        price: tripPoint.base_price,
+        isFavorite: tripPoint.is_favorite,
+      },
+    };
+
+    delete adaptedData.date_from;
+    delete adaptedData.date_to;
+    delete adaptedData.base_price;
+    delete adaptedData.is_favorite;
+
+    return adaptedData;
+  }
+
+  static adaptToServer(tripPoint) {
+    const { startDate, endDate, price, isFavorite } = tripPoint;
+    const offers = tripPoint.offers === null ? [] : tripPoint.offers.slice();
+
+    const adaptedData = {
+      ...tripPoint,
+      ...{
+        date_from: startDate.toISOString(),
+        date_to: endDate.toISOString(),
+        base_price: price,
+        is_favorite: isFavorite,
+        offers,
+      },
+    };
+
+    delete adaptedData.startDate;
+    delete adaptedData.endDate;
+    delete adaptedData.price;
+    delete adaptedData.isFavorite;
+
+    return adaptedData;
+  }
 }

@@ -3,6 +3,7 @@ import { FormMode } from '../utils/trip-event-form.js';
 import he from 'he';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { nanoid } from 'nanoid';
 
 const TextColor = {
   WARNING: 'red',
@@ -40,12 +41,15 @@ const createFormTemplate = (state) => {
 
   const generateOffersBlocksTemplate = () => {
     return allOffers[type].reduce((template, offer) => {
-      const { id, name, title, price } = offer;
-      const isSelected = tripPointOffers ? tripPointOffers.some((tripPointOffer) => tripPointOffer.id === id) : false;
+      const id = nanoid();
+      const { title, price } = offer;
+      const isSelected = tripPointOffers
+        ? tripPointOffers.some((tripPointOffer) => tripPointOffer.title === title && tripPointOffer.price === price)
+        : false;
 
       return template + `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${name}-1" type="checkbox" name="event-offer-${name}" ${isSelected ? 'checked' : ''} value="${id}">
-          <label class="event__offer-label" for="event-offer-${name}-1">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${id}" ${isSelected ? 'checked' : ''} value="${id}">
+          <label class="event__offer-label" for="event-offer-${id}">
             <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
             <span class="event__offer-price">${price}</span>
@@ -267,12 +271,11 @@ export default class TripEventForm extends SmartView {
     const allOffers = this._state.data.allOffers[this._state.data.tripPoint.type];
 
     if (allOffers) {
-      checkedCheckboxes.forEach((checkbox) => {
-        const offer = allOffers.find((offer) => offer.id === +checkbox.value);
+      checkedCheckboxes.forEach((checkboxElement) => {
+        const title = checkboxElement.parentElement.querySelector('.event__offer-title').textContent;
+        const price = checkboxElement.parentElement.querySelector('.event__offer-price').textContent;
 
-        if (offer) {
-          checkedOffers.push({ ...offer });
-        }
+        checkedOffers.push({ title, price: parseInt(price, 10) });
       });
     }
 

@@ -1,20 +1,26 @@
 import SiteNavigationView from './view/site-navigation.js';
-import NoTripEventView from './view/no-trip-event.js';
 import StatsView from './view/statistic.js';
 import Container from './utils/container.js';
-import { generateTripPoint } from './mock/trip-point.js';
 import TripRoutePresenter from './presenter/trip-route.js';
 import TripPointModel from './model/trip-point.js';
 import FilterModel from './model/filter.js';
+import DestinationModel from './model/destination.js';
+import OfferModel from './model/offer.js';
+import TripTypeModel from './model/trip-type.js';
 import FilterPresenter from './presenter/filter.js';
 import InfoPresenter from './presenter/info.js';
 import { SiteMenu } from './utils/const.js';
+import Api from './api.js';
+import { UpdateType } from './utils/const.js';
 
-const MAX_EVENTS_COUNT = 4;
+const API_HOST = 'https://14.ecmascript.pages.academy/big-trip';
+const API_AUTH_STRING = 'Krojhephjiehetug';
+const api = new Api(API_HOST, API_AUTH_STRING);
 
 //Select DOM elements
 const tripMainElement = document.querySelector('.trip-main');
 const createTripPointElement = tripMainElement.querySelector('.trip-main__event-add-btn');
+createTripPointElement.disabled = true;
 
 //Containers
 const siteNavigationContainer = new Container(tripMainElement.querySelector('.trip-controls__navigation'));
@@ -24,18 +30,34 @@ const tripEventsContainer = new Container(document.querySelector('.trip-events')
 const statsContainer = new Container(document.querySelector('.page-main .page-body__container'));
 
 //Models
-const tripPoints = Array.from({ length: MAX_EVENTS_COUNT }, generateTripPoint);
 const tripPointModel = new TripPointModel();
 const filterModel = new FilterModel();
+const offerModel = new OfferModel();
+const destinationModel = new DestinationModel();
+const tripTypeModel = new TripTypeModel();
 
 //Presenters
-const tripRoutePresenter = new TripRoutePresenter(tripEventsContainer, tripPointModel, filterModel);
+const tripRoutePresenter = new TripRoutePresenter(
+  tripEventsContainer,
+  tripPointModel,
+  filterModel,
+  tripTypeModel,
+  destinationModel,
+  offerModel,
+  api,
+);
 const filterPresenter = new FilterPresenter(tripFilterContainer, filterModel, tripPointModel);
 const infoPresenter = new InfoPresenter(tripMainContainer, tripPointModel);
 
 //Views
 const siteNavigationComponent = new SiteNavigationView();
 const statsComponent = new StatsView(tripPointModel.getTripPoints());
+
+const activateCreateTripPointButton = (updateType) => {
+  if (updateType === UpdateType.INIT) {
+    createTripPointElement.disabled = false;
+  }
+};
 
 const handleNavigationClick = (menuItem) => {
   switch(menuItem) {
@@ -73,14 +95,22 @@ const handleCreateTripPointClick = (evt) => {
 
 siteNavigationComponent.setNavigationClickHandler(handleNavigationClick);
 createTripPointElement.addEventListener('click', handleCreateTripPointClick);
+tripPointModel.addObserver(activateCreateTripPointButton);
 
-tripPointModel.setTripPoints(tripPoints);
 infoPresenter.init();
 siteNavigationContainer.append(siteNavigationComponent);
 filterPresenter.init();
+tripRoutePresenter.init();
 
-if (tripPoints.length) {
-  tripRoutePresenter.init();
-} else {
-  tripEventsContainer.append(new NoTripEventView());
-}
+Promise.all([api.getTripPoints(), api.getDestinations(), api.getOffers()])
+  .then(([tripPoints, destinations, offers]) => {
+    destinationModel.setDestinations(destinations);
+    offerModel.setOffers(offers);
+    tripPointModel.setTripPoints(UpdateType.INIT, tripPoints);
+  })
+  .catch(() => {
+    destinationModel.setDestinations([]);
+    offerModel.setOffers([]);
+    tripPointModel.setTripPoints(UpdateType.INIT, []);
+  });
+

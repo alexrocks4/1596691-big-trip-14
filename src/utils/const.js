@@ -8,6 +8,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   FILTER_CHANGED: 'FILTER_CHANGED',
+  INIT: 'INIT',
 };
 
 const FilterType = {
