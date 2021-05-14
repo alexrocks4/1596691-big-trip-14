@@ -23,14 +23,21 @@ const SortType = {
 };
 
 const SiteMenu = {
-  TABLE: 'TABLE',
-  STATS: 'STATS',
+  TABLE: 'table',
+  STATS: 'stats',
 };
+
+const MINUTES_IN_A_DAY = 1440;
+const MINUTES_IN_A_HOUR = 60;
+const MILLISECONDS_IN_MINUTE = 60000;
 
 export {
   UserAction,
   UpdateType,
   FilterType,
   SortType,
-  SiteMenu
+  SiteMenu,
+  MINUTES_IN_A_DAY,
+  MINUTES_IN_A_HOUR,
+  MILLISECONDS_IN_MINUTE
 };

@@ -1,9 +1,7 @@
 import dayjs from 'dayjs';
 import AbstractView from './abstract.js';
 import he from 'he';
-
-const MINUTES_IN_A_DAY = 1440;
-const MINUTES_IN_A_HOUR = 60;
+import { formatDuration } from '../utils/common.js';
 
 const createTripEventTemplate = (tripPoint) => {
   const {
@@ -19,30 +17,6 @@ const createTripEventTemplate = (tripPoint) => {
     endDate,
   } = tripPoint;
 
-  const padNumberWithZeros = (number, padCount = 2) => {
-    return Number(number).toString(10).padStart(padCount, '0');
-  };
-
-  const formatTripEventDuration = (durationInMinutes) => {
-    let formattedDuration = '';
-    const daysNumber = Math.floor(durationInMinutes / MINUTES_IN_A_DAY);
-    const hoursNumber = Math.floor(durationInMinutes / MINUTES_IN_A_HOUR);
-    let leftMinutes;
-
-    if (daysNumber) {
-      const leftHours = Math.floor((durationInMinutes - daysNumber * MINUTES_IN_A_DAY) / MINUTES_IN_A_HOUR);
-      leftMinutes = durationInMinutes - daysNumber * MINUTES_IN_A_DAY - leftHours * MINUTES_IN_A_HOUR;
-      formattedDuration = `${padNumberWithZeros(daysNumber)}D ${padNumberWithZeros(leftHours)}H ${padNumberWithZeros(leftMinutes)}M`;
-    } else if (hoursNumber) {
-      leftMinutes = durationInMinutes - hoursNumber * MINUTES_IN_A_HOUR;
-      formattedDuration = `${padNumberWithZeros(hoursNumber)}H ${padNumberWithZeros(leftMinutes)}M`;
-    } else {
-      formattedDuration = `${padNumberWithZeros(leftMinutes)}M`;
-    }
-
-    return formattedDuration;
-  };
-
   const createEventOfferListItemTemplate = (offer) => {
     return `<li class="event__offer">
         <span class="event__offer-title">${offer.title}</span>
@@ -55,7 +29,7 @@ const createTripEventTemplate = (tripPoint) => {
 
   startDate = dayjs(startDate);
   endDate = dayjs(endDate);
-  const formattedTripEventDuration = formatTripEventDuration(endDate.diff(startDate, 'minute'));
+  const formattedTripEventDuration = formatDuration(endDate.diff(startDate, 'minute'));
   const offersListItemsTemplate = offers
     ? offers.reduce((template, offer) => template + createEventOfferListItemTemplate(offer), '')
     : '';
