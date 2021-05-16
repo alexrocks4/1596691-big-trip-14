@@ -73,7 +73,7 @@ export default class CreateForm {
   _handleFormSubmit(data) {
     this._handleViewAction(
       UserAction.ADD_POINT,
-      UpdateType.MINOR,
+      UpdateType.MINOR_RESET_SORT,
       data,
     );
   }

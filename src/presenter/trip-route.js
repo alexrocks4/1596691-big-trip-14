@@ -44,7 +44,7 @@ export default class TripRoute {
   init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
-    this._filterModel.updateFilter(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
+    this._filterModel.updateFilter(UpdateType.MINOR_RESET_SORT, FilterType.EVERYTHING);
     this._tripPointModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
@@ -65,6 +65,7 @@ export default class TripRoute {
   destroy() {
     this._clearNoTripEvents();
     this._clearLoading();
+    this._clearCreateTripPoint();
     this._clearTripPoints();
     this._clearSort();
     this._listComponent.remove();
@@ -82,6 +83,12 @@ export default class TripRoute {
       this._offerModel,
     );
     this._createFormPresenter.init(callback);
+  }
+
+  _clearCreateTripPoint() {
+    if (this._createFormPresenter) {
+      this._createFormPresenter.destroy();
+    }
   }
 
   _renderNoTripEvents() {
@@ -166,6 +173,7 @@ export default class TripRoute {
   _rerenderTripRoute({ resetSortType = false } = {}) {
     this._clearNoTripEvents();
     this._clearSort();
+    this._clearCreateTripPoint();
     this._clearTripPoints();
 
     if (resetSortType) {
@@ -189,10 +197,16 @@ export default class TripRoute {
           .then((response) => this._tripPointModel.updateTripPoint(updateType, response));
         break;
       case UserAction.ADD_POINT:
-        this._tripPointModel.addTripPoint(updateType, update);
+        this._api.createTripPoint(update)
+          .then((response) => {
+            this._tripPointModel.addTripPoint(updateType, response);
+          });
         break;
       case UserAction.DELETE_POINT:
-        this._tripPointModel.deleteTripPoint(updateType, update);
+        this._api.deleteTripPoint(update)
+          .then(() => {
+            this._tripPointModel.deleteTripPoint(updateType, update);
+          });
         break;
     }
   }
@@ -206,7 +220,7 @@ export default class TripRoute {
         this._rerenderTripRoute();
         break;
       //Sort trip points by default when filter has been changed
-      case UpdateType.FILTER_CHANGED:
+      case UpdateType.MINOR_RESET_SORT:
         this._rerenderTripRoute({ resetSortType: true });
         break;
       case UpdateType.INIT:
@@ -222,9 +236,7 @@ export default class TripRoute {
       .values(this._tripPointPresenter)
       .forEach((presenter) => presenter.resetMode());
 
-    if (this._createFormPresenter) {
-      this._createFormPresenter.destroy();
-    }
+    this._clearCreateTripPoint();
   }
 
   _handleSortClick(sortType) {

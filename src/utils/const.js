@@ -7,7 +7,7 @@ const UserAction = {
 const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
-  FILTER_CHANGED: 'FILTER_CHANGED',
+  MINOR_RESET_SORT: 'MINOR_RESET_SORT',
   INIT: 'INIT',
 };
 
