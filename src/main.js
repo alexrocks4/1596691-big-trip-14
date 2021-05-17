@@ -93,7 +93,6 @@ const handleCreateTripPointClick = (evt) => {
   evt.target.disabled = true;
 };
 
-siteNavigationComponent.setNavigationClickHandler(handleNavigationClick);
 createTripPointElement.addEventListener('click', handleCreateTripPointClick);
 tripPointModel.addObserver(activateCreateTripPointButton);
 
@@ -107,6 +106,7 @@ Promise.all([api.getTripPoints(), api.getDestinations(), api.getOffers()])
     destinationModel.set(destinations);
     offerModel.set(offers);
     tripPointModel.setTripPoints(UpdateType.INIT, tripPoints);
+    siteNavigationComponent.setNavigationClickHandler(handleNavigationClick);
   })
   .catch(() => {
     destinationModel.set([]);
