@@ -16,7 +16,7 @@ export default class TripType {
     this._tripTypes = TRIP_TYPES;
   }
 
-  getTripTypes() {
+  get() {
     return this._tripTypes;
   }
 }

@@ -43,10 +43,10 @@ export default class CreateForm {
 
     this._createFormOptions = {
       mode: FormMode.CREATE,
-      TRIP_TYPES: this._tripTypeModel.getTripTypes(),
-      destinations: this._destinationModel.getDestinations(),
-      tripPoint: getBlankTripPoint(this._tripTypeModel.getTripTypes(), this._destinationModel.getDestinations()),
-      allOffers: this._offerModel.getOffers(),
+      TRIP_TYPES: this._tripTypeModel.get(),
+      destinations: this._destinationModel.get(),
+      tripPoint: getBlankTripPoint(this._tripTypeModel.get(), this._destinationModel.get()),
+      allOffers: this._offerModel.get(),
     };
     this._formComponent = new FormView(this._createFormOptions);
     this._formComponent.setFormSubmitHandler(this._handleFormSubmit);

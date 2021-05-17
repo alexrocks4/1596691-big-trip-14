@@ -6,11 +6,11 @@ export default class Destination extends Observable {
     this._destinations = null;
   }
 
-  setDestinations(destinations) {
+  set(destinations) {
     this._destinations = destinations;
   }
 
-  getDestinations() {
+  get() {
     return this._destinations;
   }
 }

@@ -44,7 +44,7 @@ export default class TripRoute {
   init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
-    this._filterModel.updateFilter(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
+    this._filterModel.update(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
     this._tripPointModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 

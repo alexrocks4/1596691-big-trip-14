@@ -46,10 +46,10 @@ export default class TripPoint {
     this._prevlistItemComponent = this._listItemComponent;
     this._tripPoint = tripPoint;
     this._editFormOptions = {
-      TRIP_TYPES: this._tripTypeModel.getTripTypes(),
-      destinations: this._destinationModel.getDestinations(),
+      TRIP_TYPES: this._tripTypeModel.get(),
+      destinations: this._destinationModel.get(),
       tripPoint,
-      allOffers: this._offerModel.getOffers(),
+      allOffers: this._offerModel.get(),
     };
     this._tripEventComponent = new TripEventView(tripPoint);
     this._editFormComponent = new TripEventFormView(this._editFormOptions);

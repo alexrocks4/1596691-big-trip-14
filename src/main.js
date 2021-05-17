@@ -104,13 +104,13 @@ tripRoutePresenter.init();
 
 Promise.all([api.getTripPoints(), api.getDestinations(), api.getOffers()])
   .then(([tripPoints, destinations, offers]) => {
-    destinationModel.setDestinations(destinations);
-    offerModel.setOffers(offers);
+    destinationModel.set(destinations);
+    offerModel.set(offers);
     tripPointModel.setTripPoints(UpdateType.INIT, tripPoints);
   })
   .catch(() => {
-    destinationModel.setDestinations([]);
-    offerModel.setOffers([]);
+    destinationModel.set([]);
+    offerModel.set([]);
     tripPointModel.setTripPoints(UpdateType.INIT, []);
   });
 

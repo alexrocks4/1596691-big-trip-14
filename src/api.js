@@ -14,27 +14,6 @@ export default class Api {
     this._authorizationString = authorizationString;
   }
 
-  _sendRequest({
-    path = '',
-    method = Method.GET,
-    headers = {},
-    body = null,
-  }) {
-    const init = {
-      method,
-      headers,
-    };
-
-    init.headers['Authorization'] = `Basic ${this._authorizationString}`;
-
-    if (body) {
-      init.body = body;
-    }
-
-    return fetch(`${this._host}${path}`, init)
-      .then((response) => Api.checkStatus(response));
-  }
-
   getTripPoints() {
     return this._sendRequest({
       path: '/points',
@@ -89,6 +68,27 @@ export default class Api {
     })
       .then(Api.toJSON)
       .then(OfferModel.adaptToModel);
+  }
+
+  _sendRequest({
+    path = '',
+    method = Method.GET,
+    headers = {},
+    body = null,
+  }) {
+    const init = {
+      method,
+      headers,
+    };
+
+    init.headers['Authorization'] = `Basic ${this._authorizationString}`;
+
+    if (body) {
+      init.body = body;
+    }
+
+    return fetch(`${this._host}${path}`, init)
+      .then((response) => Api.checkStatus(response));
   }
 
   static checkStatus(response) {
