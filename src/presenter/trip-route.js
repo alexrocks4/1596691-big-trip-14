@@ -65,6 +65,7 @@ export default class TripRoute {
   destroy() {
     this._clearNoTripEvents();
     this._clearLoading();
+    this._clearCreateTripPoint();
     this._clearTripPoints();
     this._clearSort();
     this._listComponent.remove();
@@ -82,6 +83,12 @@ export default class TripRoute {
       this._offerModel,
     );
     this._createFormPresenter.init(callback);
+  }
+
+  _clearCreateTripPoint() {
+    if (this._createFormPresenter) {
+      this._createFormPresenter.destroy();
+    }
   }
 
   _renderNoTripEvents() {
@@ -166,6 +173,7 @@ export default class TripRoute {
   _rerenderTripRoute({ resetSortType = false } = {}) {
     this._clearNoTripEvents();
     this._clearSort();
+    this._clearCreateTripPoint();
     this._clearTripPoints();
 
     if (resetSortType) {
@@ -186,13 +194,30 @@ export default class TripRoute {
     switch(actionType) {
       case UserAction.UPDATE_POINT:
         this._api.updateTripPoint(update)
-          .then((response) => this._tripPointModel.updateTripPoint(updateType, response));
+          .then((response) => {
+            this._tripPointPresenter[update.id].closeEditForm();
+            this._tripPointModel.updateTripPoint(updateType, response);})
+          .catch(() => {
+            this._tripPointPresenter[update.id].setAbortingViewState();
+          });
         break;
       case UserAction.ADD_POINT:
-        this._tripPointModel.addTripPoint(updateType, update);
+        this._api.createTripPoint(update)
+          .then((response) => {
+            this._createFormPresenter.destroy();
+            this._tripPointModel.addTripPoint(updateType, response);})
+          .catch(() => {
+            this._createFormPresenter.setAbortingViewState();
+          });
         break;
       case UserAction.DELETE_POINT:
-        this._tripPointModel.deleteTripPoint(updateType, update);
+        this._api.deleteTripPoint(update)
+          .then(() => {
+            this._tripPointPresenter[update.id].closeEditForm();
+            this._tripPointModel.deleteTripPoint(updateType, update);})
+          .catch(() => {
+            this._tripPointPresenter[update.id].setAbortingViewState();
+          });
         break;
     }
   }
@@ -206,7 +231,7 @@ export default class TripRoute {
         this._rerenderTripRoute();
         break;
       //Sort trip points by default when filter has been changed
-      case UpdateType.FILTER_CHANGED:
+      case UpdateType.MINOR_RESET_SORT:
         this._rerenderTripRoute({ resetSortType: true });
         break;
       case UpdateType.INIT:
@@ -222,9 +247,7 @@ export default class TripRoute {
       .values(this._tripPointPresenter)
       .forEach((presenter) => presenter.resetMode());
 
-    if (this._createFormPresenter) {
-      this._createFormPresenter.destroy();
-    }
+    this._clearCreateTripPoint();
   }
 
   _handleSortClick(sortType) {

@@ -31,7 +31,7 @@ const formatDuration = (durationInMinutes) => {
   let formattedDuration = '';
   const daysNumber = Math.floor(durationInMinutes / MINUTES_IN_A_DAY);
   const hoursNumber = Math.floor(durationInMinutes / MINUTES_IN_A_HOUR);
-  let leftMinutes;
+  let leftMinutes = 0;
 
   if (daysNumber) {
     const leftHours = Math.floor((durationInMinutes - daysNumber * MINUTES_IN_A_DAY) / MINUTES_IN_A_HOUR);
@@ -41,7 +41,7 @@ const formatDuration = (durationInMinutes) => {
     leftMinutes = durationInMinutes - hoursNumber * MINUTES_IN_A_HOUR;
     formattedDuration = `${padNumberWithZeros(hoursNumber)}H ${padNumberWithZeros(leftMinutes)}M`;
   } else {
-    formattedDuration = `${padNumberWithZeros(leftMinutes)}M`;
+    formattedDuration = `${padNumberWithZeros(durationInMinutes)}M`;
   }
 
   return formattedDuration;
