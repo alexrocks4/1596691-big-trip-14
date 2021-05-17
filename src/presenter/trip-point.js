@@ -37,7 +37,7 @@ export default class TripPoint {
     this._handleRollupClick = this._handleRollupClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
-
+    this._clearViewState = this._clearViewState.bind(this);
   }
 
   init(tripPoint) {
@@ -94,6 +94,34 @@ export default class TripPoint {
     this._listItemComponent.remove();
   }
 
+  closeEditForm() {
+    this._editFormComponent.reset(this._editFormOptions);
+    this._replaceEditFormToTripEvent();
+  }
+
+  setAbortingViewState() {
+    this._editFormComponent.shake(this._clearViewState);
+  }
+
+  _clearViewState() {
+    this._editFormComponent.updateState({
+      isSaving: false,
+      isDeleting: false,
+    });
+  }
+
+  _setSavingViewState() {
+    this._editFormComponent.updateState({
+      isSaving: true,
+    });
+  }
+
+  _setDeletingViewState() {
+    this._editFormComponent.updateState({
+      isDeleting: true,
+    });
+  }
+
   _replaceTripEventToEditForm() {
     this._changeMode();
     this._listItemContainer.replace(this._editFormComponent, this._tripEventComponent);
@@ -112,8 +140,7 @@ export default class TripPoint {
   }
 
   _handleFormSubmit(data) {
-    this._editFormComponent.reset(this._editFormOptions);
-    this._replaceEditFormToTripEvent();
+    this._setSavingViewState();
     this._handleViewAction(
       UserAction.UPDATE_POINT,
       isDatesChanged(data, this._tripPoint) || data.price !== this._tripPoint.price ? UpdateType.MINOR : UpdateType.PATCH,
@@ -122,7 +149,7 @@ export default class TripPoint {
   }
 
   _handleDeleteClick() {
-    this._replaceEditFormToTripEvent();
+    this._setDeletingViewState();
     this._handleViewAction(
       UserAction.DELETE_POINT,
       UpdateType.MINOR,
@@ -131,8 +158,7 @@ export default class TripPoint {
   }
 
   _handleRollupClick() {
-    this._editFormComponent.reset(this._editFormOptions);
-    this._replaceEditFormToTripEvent();
+    this.closeEditForm();
   }
 
   _handleFavoriteClick() {
@@ -146,8 +172,7 @@ export default class TripPoint {
   _onEscKeyDown(evt) {
     if (isEscKeyPressed(evt)) {
       evt.preventDefault();
-      this._editFormComponent.reset(this._editFormOptions);
-      this._replaceEditFormToTripEvent();
+      this.closeEditForm();
     }
   }
 }

@@ -36,6 +36,7 @@ export default class CreateForm {
     this._handleRollupClick = this._handleRollupClick.bind(this);
     this._handleCancelClick = this._handleCancelClick.bind(this);
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
+    this._clearViewState = this._clearViewState.bind(this);
   }
 
   init(callback) {
@@ -70,7 +71,24 @@ export default class CreateForm {
     }
   }
 
+  setAbortingViewState() {
+    this._formComponent.shake(this._clearViewState);
+  }
+
+  _clearViewState() {
+    this._formComponent.updateState({
+      isSaving: false,
+    });
+  }
+
+  _setSavingViewState() {
+    this._formComponent.updateState({
+      isSaving: true,
+    });
+  }
+
   _handleFormSubmit(data) {
+    this._setSavingViewState();
     this._handleViewAction(
       UserAction.ADD_POINT,
       UpdateType.MINOR_RESET_SORT,

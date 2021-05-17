@@ -194,18 +194,29 @@ export default class TripRoute {
     switch(actionType) {
       case UserAction.UPDATE_POINT:
         this._api.updateTripPoint(update)
-          .then((response) => this._tripPointModel.updateTripPoint(updateType, response));
+          .then((response) => {
+            this._tripPointPresenter[update.id].closeEditForm();
+            this._tripPointModel.updateTripPoint(updateType, response);})
+          .catch(() => {
+            this._tripPointPresenter[update.id].setAbortingViewState();
+          });
         break;
       case UserAction.ADD_POINT:
         this._api.createTripPoint(update)
           .then((response) => {
-            this._tripPointModel.addTripPoint(updateType, response);
+            this._createFormPresenter.destroy();
+            this._tripPointModel.addTripPoint(updateType, response);})
+          .catch(() => {
+            this._createFormPresenter.setAbortingViewState();
           });
         break;
       case UserAction.DELETE_POINT:
         this._api.deleteTripPoint(update)
           .then(() => {
-            this._tripPointModel.deleteTripPoint(updateType, update);
+            this._tripPointPresenter[update.id].closeEditForm();
+            this._tripPointModel.deleteTripPoint(updateType, update);})
+          .catch(() => {
+            this._tripPointPresenter[update.id].setAbortingViewState();
           });
         break;
     }
