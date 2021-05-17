@@ -95,8 +95,10 @@ export default class TripPoint {
   }
 
   closeEditForm() {
-    this._editFormComponent.reset(this._editFormOptions);
-    this._replaceEditFormToTripEvent();
+    if (this._mode === Mode.EDITING) {
+      this._editFormComponent.reset(this._editFormOptions);
+      this._replaceEditFormToTripEvent();
+    }
   }
 
   setAbortingViewState() {
