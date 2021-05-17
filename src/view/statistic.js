@@ -5,13 +5,19 @@ import { getChartData, renderChart } from '../utils/statistic.js';
 
 const BAR_HEIGHT = 55;
 const SCALE = 5;
+const ChartTitle = {
+  MONEY: 'MONEY',
+  TRANSPORT: 'TYPE',
+  DURATION: 'TIME-SPEND',
+};
 
-const renderMoneyChart = (ctx, chartData = []) => {
+const renderMoneyChart = (ctx, chartData = [], title) => {
   const options = {
     ctx,
     labels: [],
     data: [],
     formatter: (val) => `€ ${val}`,
+    title,
   };
 
   chartData.forEach((data) => {
@@ -22,12 +28,13 @@ const renderMoneyChart = (ctx, chartData = []) => {
   renderChart(options);
 };
 
-const renderTransportChart = (ctx, chartData) => {
+const renderTransportChart = (ctx, chartData, title) => {
   const options = {
     ctx,
     labels: [],
     data: [],
     formatter: (val) => `${val}x`,
+    title,
   };
 
   chartData.forEach((data) => {
@@ -38,12 +45,13 @@ const renderTransportChart = (ctx, chartData) => {
   renderChart(options);
 };
 
-const renderDurationChart = (ctx, chartData) => {
+const renderDurationChart = (ctx, chartData, title) => {
   const options = {
     ctx,
     labels: [],
     data: [],
-    formatter: (val) => formatDuration(val/MILLISECONDS_IN_MINUTE),
+    formatter: (val) => formatDuration(Math.round(val/MILLISECONDS_IN_MINUTE)),
+    title,
   };
 
   chartData.forEach((data) => {
@@ -111,8 +119,8 @@ export default class Stats extends Abstract {
     this._transportCtx.height = BAR_HEIGHT * SCALE;
     this._timeCtx.height = BAR_HEIGHT * SCALE;
 
-    renderMoneyChart(this._moneyCtx, chartData.slice().sort((dataA, dataB) => dataB.data.money - dataA.data.money));
-    renderTransportChart(this._transportCtx, chartData.slice().sort((dataA, dataB) => dataB.data.transport - dataA.data.transport));
-    renderDurationChart(this._timeCtx, chartData.slice().sort((dataA, dataB) => dataB.data.duration - dataA.data.duration));
+    renderMoneyChart(this._moneyCtx, chartData.slice().sort((dataA, dataB) => dataB.data.money - dataA.data.money), ChartTitle.MONEY);
+    renderTransportChart(this._transportCtx, chartData.slice().sort((dataA, dataB) => dataB.data.transport - dataA.data.transport), ChartTitle.TRANSPORT);
+    renderDurationChart(this._timeCtx, chartData.slice().sort((dataA, dataB) => dataB.data.duration - dataA.data.duration), ChartTitle.DURATION);
   }
 }

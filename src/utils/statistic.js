@@ -25,7 +25,7 @@ const getChartData = (tripPoints = []) => {
   }));
 };
 
-const renderChart = ({ ctx, labels, data, formatter }) => {
+const renderChart = ({ ctx, labels, data, formatter, title }) => {
   new Chart(ctx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
@@ -54,7 +54,7 @@ const renderChart = ({ ctx, labels, data, formatter }) => {
       },
       title: {
         display: true,
-        text: 'TYPE',
+        text: title,
         fontColor: '#000000',
         fontSize: 23,
         position: 'left',
