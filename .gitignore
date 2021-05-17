@@ -1,6 +1,7 @@
 # Файлы и папки операционной системы
 .DS_Store
 Thumbs.db
+.directory
 
 # Файлы редактора
 .idea
@@ -10,6 +11,7 @@ Thumbs.db
 # Вспомогательные файлы
 *.log*
 node_modules/
+*.http
 
 # Собранные файлы (допишите самостоятельно)
 public/bundle.js

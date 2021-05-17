@@ -1,18 +1,13 @@
 import FormView from '../view/trip-event-form.js';
 import { FormMode } from '../utils/trip-event-form.js';
-import { TRIP_TYPES } from '../mock/trip-type.js';
-import { destinations } from '../mock/destination.js';
-import { POINT_TYPE_TO_OFFERS } from '../mock/offer.js';
-import { nanoid } from 'nanoid';
 import { isEscKeyPressed } from '../utils/common.js';
 import { UserAction, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item.js';
 import Container from '../utils/container.js';
 
-const getBlankTripPoint = () => {
+const getBlankTripPoint = (tripTypes, destinations) => {
   return {
-    id: nanoid(),
-    type: TRIP_TYPES[0],
+    type: tripTypes[0],
     destination: destinations[0],
     offers: null,
     startDate: new Date(),
@@ -23,9 +18,18 @@ const getBlankTripPoint = () => {
 };
 
 export default class CreateForm {
-  constructor(container, handleViewAction) {
+  constructor(
+    container,
+    handleViewAction,
+    tripTypeModel,
+    destinationModel,
+    offerModel,
+  ) {
     this._container = container;
     this._handleViewAction = handleViewAction;
+    this._tripTypeModel = tripTypeModel;
+    this._destinationModel = destinationModel;
+    this._offerModel = offerModel;
     this._destroyCallback = null;
 
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
@@ -39,10 +43,10 @@ export default class CreateForm {
 
     this._createFormOptions = {
       mode: FormMode.CREATE,
-      TRIP_TYPES,
-      destinations,
-      tripPoint: getBlankTripPoint(),
-      allOffers: POINT_TYPE_TO_OFFERS,
+      TRIP_TYPES: this._tripTypeModel.get(),
+      destinations: this._destinationModel.get(),
+      tripPoint: getBlankTripPoint(this._tripTypeModel.get(), this._destinationModel.get()),
+      allOffers: this._offerModel.get(),
     };
     this._formComponent = new FormView(this._createFormOptions);
     this._formComponent.setFormSubmitHandler(this._handleFormSubmit);

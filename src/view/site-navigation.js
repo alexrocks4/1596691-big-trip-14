@@ -11,7 +11,7 @@ export const createSiteNavigationTemplate = () => {
 export default class SiteNavigation extends AbstractView {
   constructor() {
     super();
-    this._navigatioClickHandler = this._navigatioClickHandler.bind(this);
+    this._navigationClickHandler = this._navigationClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -20,10 +20,12 @@ export default class SiteNavigation extends AbstractView {
 
   setNavigationClickHandler(callback) {
     this._callback.navigationClick = callback;
-    this.getElement().addEventListener('click', this._navigatioClickHandler);
+    this.getElement().addEventListener('click', this._navigationClickHandler);
   }
 
-  _navigatioClickHandler(evt) {
+  _navigationClickHandler(evt) {
+    evt.preventDefault();
+
     const target = evt.target.closest('.trip-tabs__btn');
     const activeItem = this.getElement().querySelector('.trip-tabs__btn--active');
 
@@ -32,7 +34,6 @@ export default class SiteNavigation extends AbstractView {
       return;
     }
 
-    evt.preventDefault();
     activeItem.classList.remove('trip-tabs__btn--active');
     target.classList.add('trip-tabs__btn--active');
     this._callback.navigationClick(target.dataset.menuItem);

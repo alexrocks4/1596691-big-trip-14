@@ -7,15 +7,33 @@ import { sortTripPoints } from '../utils/trip-point.js';
 import { UserAction, UpdateType, FilterType } from '../utils/const.js';
 import { filter } from '../utils/filter.js';
 import CreateFormPresenter from './create-form.js';
+import LoadingView from '../view/loading.js';
+import NoTripEventView from '../view/no-trip-event.js';
 
 export default class TripRoute {
-  constructor(tripEventsContainer = null, tripPointModel, filterModel) {
+  constructor(
+    tripEventsContainer = null,
+    tripPointModel,
+    filterModel,
+    tripTypeModel,
+    destinationModel,
+    offerModel,
+    api,
+  ) {
     this._tripEventsContainer = tripEventsContainer;
     this._tripPointModel = tripPointModel;
     this._filterModel = filterModel;
+    this._tripTypeModel = tripTypeModel;
+    this._destinationModel = destinationModel;
+    this._offerModel = offerModel;
     this._tripPointPresenter =  {};
     this._currentSortType = SortType.DEFAULT;
     this._createFormPresenter = null;
+    this._api = api;
+
+    this._noTripEventComponent = new NoTripEventView();
+    this._loadingComponent = new LoadingView();
+    this._loading = true;
 
     this._changeMode = this._changeMode.bind(this);
     this._handleSortClick = this._handleSortClick.bind(this);
@@ -26,16 +44,29 @@ export default class TripRoute {
   init() {
     this._listComponent = new TripEventsListView();
     this._listContainer = new Container(this._listComponent);
-    this._filterModel.updateFilter(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
+    this._filterModel.update(UpdateType.FILTER_CHANGED, FilterType.EVERYTHING);
     this._tripPointModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
+
+    if (this._loading) {
+      this._renderLoading();
+      return;
+    }
+
+    if (!this._tripPointModel.getTripPoints().length) {
+      this._renderNoTripEvents();
+      return;
+    }
+
     this._renderSort();
     this._renderTripPoints();
   }
 
   destroy() {
+    this._clearNoTripEvents();
+    this._clearLoading();
     this._clearTripPoints();
-    this._tripSortComponent.remove();
+    this._clearSort();
     this._listComponent.remove();
     this._currentSortType = SortType.DEFAULT;
     this._tripPointModel.removeObserver(this._handleModelEvent);
@@ -43,8 +74,30 @@ export default class TripRoute {
   }
 
   createTripPoint(callback) {
-    this._createFormPresenter = new CreateFormPresenter(this._listContainer, this._handleViewAction);
+    this._createFormPresenter = new CreateFormPresenter(
+      this._listContainer,
+      this._handleViewAction,
+      this._tripTypeModel,
+      this._destinationModel,
+      this._offerModel,
+    );
     this._createFormPresenter.init(callback);
+  }
+
+  _renderNoTripEvents() {
+    this._tripEventsContainer.append(this._noTripEventComponent);
+  }
+
+  _clearNoTripEvents() {
+    this._noTripEventComponent.remove();
+  }
+
+  _renderLoading() {
+    this._tripEventsContainer.append(this._loadingComponent);
+  }
+
+  _clearLoading() {
+    this._loadingComponent.remove();
   }
 
   _getTripPoints() {
@@ -52,7 +105,14 @@ export default class TripRoute {
   }
 
   _renderTripPoint(tripPoint) {
-    const tripPointPresenter = new TripPointPresenter(this._listContainer, this._handleViewAction, this._changeMode);
+    const tripPointPresenter = new TripPointPresenter(
+      this._listContainer,
+      this._handleViewAction,
+      this._changeMode,
+      this._tripTypeModel,
+      this._destinationModel,
+      this._offerModel,
+    );
     tripPointPresenter.init(tripPoint);
     this._tripPointPresenter[tripPoint.id] = tripPointPresenter;
   }
@@ -83,20 +143,36 @@ export default class TripRoute {
     this._tripEventsContainer.append(this._tripSortComponent);
   }
 
-  _rerenderSort() {
+  _clearSort() {
     this._tripSortComponent.remove();
+  }
+
+  _rerenderSort() {
+    this._clearSort();
     this._renderSort();
   }
 
+  _renderTripRoute() {
+    if (!this._tripPointModel.getTripPoints().length) {
+      this._renderNoTripEvents();
+
+      return;
+    }
+
+    this._renderSort();
+    this._renderTripPoints();
+  }
+
   _rerenderTripRoute({ resetSortType = false } = {}) {
+    this._clearNoTripEvents();
+    this._clearSort();
+    this._clearTripPoints();
 
     if (resetSortType) {
       this._currentSortType = SortType.DEFAULT;
     }
 
-    this._rerenderSort();
-    this._rerenderTripPoints();
-
+    this._renderTripRoute();
   }
 
   _filterTripPoints() {
@@ -109,7 +185,8 @@ export default class TripRoute {
   _handleViewAction(actionType, updateType, update) {
     switch(actionType) {
       case UserAction.UPDATE_POINT:
-        this._tripPointModel.updateTripPoint(updateType, update);
+        this._api.updateTripPoint(update)
+          .then((response) => this._tripPointModel.updateTripPoint(updateType, response));
         break;
       case UserAction.ADD_POINT:
         this._tripPointModel.addTripPoint(updateType, update);
@@ -131,6 +208,11 @@ export default class TripRoute {
       //Sort trip points by default when filter has been changed
       case UpdateType.FILTER_CHANGED:
         this._rerenderTripRoute({ resetSortType: true });
+        break;
+      case UpdateType.INIT:
+        this._loading = false;
+        this._clearLoading();
+        this._renderTripRoute();
         break;
     }
   }
