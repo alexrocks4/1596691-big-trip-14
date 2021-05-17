@@ -43,7 +43,7 @@ export default class Filter {
       return;
     }
 
-    this._filterModel.updateFilter(UpdateType.MINOR_RESET_SORT, filterType);
+    this._filterModel.update(UpdateType.FILTER_CHANGED, filterType);
   }
 
   _getFilters() {

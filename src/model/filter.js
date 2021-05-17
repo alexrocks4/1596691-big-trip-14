@@ -7,7 +7,7 @@ export default class Filter extends Observable {
     this._filter = FilterType.EVERYTHING;
   }
 
-  updateFilter(updateType, filter) {
+  update(updateType, filter) {
     this._filter = filter;
     this.notifyObservers(updateType, filter);
   }
