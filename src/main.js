@@ -114,3 +114,7 @@ Promise.all([api.getTripPoints(), api.getDestinations(), api.getOffers()])
     tripPointModel.setTripPoints(UpdateType.INIT, []);
   });
 
+window.addEventListener('load', () => {
+  navigator.serviceWorker.register('/sw.js');
+});
+
