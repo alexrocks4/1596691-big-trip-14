@@ -47,10 +47,15 @@ const formatDuration = (durationInMinutes) => {
   return formattedDuration;
 };
 
+const isOnline = () => {
+  return window.navigator.onLine;
+};
+
 export {
   getRandomIntegerInclusive,
   getRandomArrayElement,
   isEscKeyPressed,
   setToInteger,
-  formatDuration
+  formatDuration,
+  isOnline
 };

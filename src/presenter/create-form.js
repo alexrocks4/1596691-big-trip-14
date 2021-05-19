@@ -4,6 +4,8 @@ import { isEscKeyPressed } from '../utils/common.js';
 import { UserAction, UpdateType } from '../utils/const.js';
 import TripEventsListItemView from '../view/trip-events-list-item.js';
 import Container from '../utils/container.js';
+import { toast, Message } from '../utils/toast.js';
+import { isOnline } from '../utils/common.js';
 
 const getBlankTripPoint = (tripTypes, destinations) => {
   return {
@@ -88,6 +90,13 @@ export default class CreateForm {
   }
 
   _handleFormSubmit(data) {
+    if (!isOnline()) {
+      toast(Message.NOCREATE);
+      this.setAbortingViewState();
+
+      return;
+    }
+
     this._setSavingViewState();
     this._handleViewAction(
       UserAction.ADD_POINT,

@@ -151,7 +151,9 @@ export default class TripRoute {
   }
 
   _clearSort() {
-    this._tripSortComponent.remove();
+    if (this._tripSortComponent) {
+      this._tripSortComponent.remove();
+    }
   }
 
   _rerenderSort() {

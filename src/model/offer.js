@@ -23,4 +23,8 @@ export default class Offer extends Observable {
 
     return adaptedOffers;
   }
+
+  static adaptToServer(offers) {
+    return Object.entries(offers).map(([type, offers]) => ({ type, offers }));
+  }
 }

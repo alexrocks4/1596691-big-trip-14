@@ -1,5 +1,5 @@
-import TripPointModel from './model/trip-point.js';
-import OfferModel from './model/offer.js';
+import TripPointModel from '../model/trip-point.js';
+import OfferModel from '../model/offer.js';
 
 const Method = {
   GET: 'GET',
@@ -68,6 +68,18 @@ export default class Api {
     })
       .then(Api.toJSON)
       .then(OfferModel.adaptToModel);
+  }
+
+  sync(data) {
+    return this._sendRequest({
+      path: '/points/sync',
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: {
+        'Content-type': 'application/json',
+      },
+    })
+      .then(Api.toJSON);
   }
 
   _sendRequest({
