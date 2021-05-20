@@ -10,12 +10,21 @@ import TripTypeModel from './model/trip-type.js';
 import FilterPresenter from './presenter/filter.js';
 import InfoPresenter from './presenter/info.js';
 import { SiteMenu } from './utils/const.js';
-import Api from './api.js';
+import Api from './api/api.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 import { UpdateType } from './utils/const.js';
+import { toast, Message } from './utils/toast.js';
+import { isOnline } from './utils/common.js';
 
 const API_HOST = 'https://14.ecmascript.pages.academy/big-trip';
 const API_AUTH_STRING = 'Krojhephjiehetug';
+const STORE_PREFIX = 'bigtrip-localstorage';
+const STORE_VER = 'v1';
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 const api = new Api(API_HOST, API_AUTH_STRING);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
 
 //Select DOM elements
 const tripMainElement = document.querySelector('.trip-main');
@@ -44,7 +53,7 @@ const tripRoutePresenter = new TripRoutePresenter(
   tripTypeModel,
   destinationModel,
   offerModel,
-  api,
+  apiWithProvider,
 );
 const filterPresenter = new FilterPresenter(tripFilterContainer, filterModel, tripPointModel);
 const infoPresenter = new InfoPresenter(tripMainContainer, tripPointModel);
@@ -87,6 +96,11 @@ const handleCreateFormClose = () => {
 };
 
 const handleCreateTripPointClick = (evt) => {
+  if (!isOnline()) {
+    toast(Message.NOCREATE);
+    return;
+  }
+
   tripRoutePresenter.destroy();
   tripRoutePresenter.init();
   tripRoutePresenter.createTripPoint(handleCreateFormClose);
@@ -101,7 +115,7 @@ siteNavigationContainer.append(siteNavigationComponent);
 filterPresenter.init();
 tripRoutePresenter.init();
 
-Promise.all([api.getTripPoints(), api.getDestinations(), api.getOffers()])
+Promise.all([apiWithProvider.getTripPoints(), apiWithProvider.getDestinations(), apiWithProvider.getOffers()])
   .then(([tripPoints, destinations, offers]) => {
     destinationModel.set(destinations);
     offerModel.set(offers);
@@ -113,4 +127,17 @@ Promise.all([api.getTripPoints(), api.getDestinations(), api.getOffers()])
     offerModel.set([]);
     tripPointModel.setTripPoints(UpdateType.INIT, []);
   });
+
+window.addEventListener('load', () => {
+  navigator.serviceWorker.register('/sw.js');
+});
+
+window.addEventListener('online', () => {
+  document.title = document.title.replace('[offline] ', '');
+  apiWithProvider.sync();
+});
+
+window.addEventListener('offline', () => {
+  document.title = `[offline] ${document.title}` ;
+});
 

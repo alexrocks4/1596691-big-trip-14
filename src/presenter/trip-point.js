@@ -5,6 +5,8 @@ import TripEventFormView from '../view/trip-event-form.js';
 import { isEscKeyPressed } from '../utils/common.js';
 import { UserAction, UpdateType } from '../utils/const.js';
 import { isDatesChanged } from '../utils/trip-point.js';
+import { toast, Message } from '../utils/toast.js';
+import { isOnline } from '../utils/common.js';
 
 const Mode = {
   DEFAULT: 'default',
@@ -138,10 +140,22 @@ export default class TripPoint {
   }
 
   _handleEditClick() {
+    if (!isOnline()) {
+      toast(Message.NOEDIT);
+      return;
+    }
+
     this._replaceTripEventToEditForm();
   }
 
   _handleFormSubmit(data) {
+    if (!isOnline()) {
+      toast(Message.NOEDIT);
+      this.setAbortingViewState();
+
+      return;
+    }
+
     this._setSavingViewState();
     this._handleViewAction(
       UserAction.UPDATE_POINT,
@@ -151,6 +165,13 @@ export default class TripPoint {
   }
 
   _handleDeleteClick() {
+    if (!isOnline()) {
+      toast(Message.NODELETE);
+      this.setAbortingViewState();
+
+      return;
+    }
+
     this._setDeletingViewState();
     this._handleViewAction(
       UserAction.DELETE_POINT,
