@@ -194,16 +194,7 @@ export default class TripEventForm extends SmartView {
 
   removeElement() {
     super.removeElement();
-
-    if (this._startDatePicker) {
-      this._startDatePicker.destroy();
-      this._startDatePicker = null;
-    }
-
-    if (this._endDatePicker) {
-      this._endDatePicker.destroy();
-      this._endDatePicker = null;
-    }
+    this._clearDatePicker();
   }
 
   restoreHandlers() {
@@ -237,10 +228,7 @@ export default class TripEventForm extends SmartView {
     this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._resetClickHandler);
   }
 
-  _setDatePicker() {
-    const startDate = this._state.data.tripPoint.startDate;
-    const endDate = this._state.data.tripPoint.endDate;
-
+  _clearDatePicker() {
     if (this._startDatePicker) {
       this._startDatePicker.destroy();
       this._startDatePicker = null;
@@ -250,6 +238,13 @@ export default class TripEventForm extends SmartView {
       this._endDatePicker.destroy();
       this._endDatePicker = null;
     }
+  }
+
+  _setDatePicker() {
+    const startDate = this._state.data.tripPoint.startDate;
+    const endDate = this._state.data.tripPoint.endDate;
+
+    this._clearDatePicker();
 
     this._startDatePicker = flatpickr(this.getElement().querySelector('#event-start-time-1'), {
       enableTime: true,
