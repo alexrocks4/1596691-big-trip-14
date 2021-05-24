@@ -37,7 +37,7 @@ export default class CreateForm {
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleRollupClick = this._handleRollupClick.bind(this);
     this._handleCancelClick = this._handleCancelClick.bind(this);
-    this._onEscKeyDown = this._onEscKeyDown.bind(this);
+    this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._clearViewState = this._clearViewState.bind(this);
   }
 
@@ -55,7 +55,7 @@ export default class CreateForm {
     this._formComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._formComponent.setRollupClickHandler(this._handleRollupClick);
     this._formComponent.setResetClickHandler(this._handleCancelClick);
-    document.addEventListener('keydown', this._onEscKeyDown);
+    document.addEventListener('keydown', this._escKeyDownHandler);
 
     this._listItemComponent = new TripEventsListItemView();
     this._listItemContainer = new Container(this._listItemComponent);
@@ -66,7 +66,7 @@ export default class CreateForm {
   destroy() {
     this._formComponent.remove();
     this._listItemComponent.remove();
-    document.removeEventListener('keydown', this._onEscKeyDown);
+    document.removeEventListener('keydown', this._escKeyDownHandler);
 
     if (this._destroyCallback) {
       this._destroyCallback();
@@ -113,7 +113,7 @@ export default class CreateForm {
     this.destroy();
   }
 
-  _onEscKeyDown(evt) {
+  _escKeyDownHandler(evt) {
     if (isEscKeyPressed(evt)) {
       evt.preventDefault();
       this.destroy();

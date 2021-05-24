@@ -33,7 +33,7 @@ export default class TripPoint {
     this._destinationModel = destinationModel;
     this._offerModel = offerModel;
 
-    this._onEscKeyDown = this._onEscKeyDown.bind(this);
+    this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._handleEditClick = this._handleEditClick.bind(this);
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleRollupClick = this._handleRollupClick.bind(this);
@@ -129,13 +129,13 @@ export default class TripPoint {
   _replaceTripEventToEditForm() {
     this._changeMode();
     this._listItemContainer.replace(this._editFormComponent, this._tripEventComponent);
-    document.addEventListener('keydown', this._onEscKeyDown);
+    document.addEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.EDITING;
   }
 
   _replaceEditFormToTripEvent() {
     this._listItemContainer.replace(this._tripEventComponent, this._editFormComponent);
-    document.removeEventListener('keydown', this._onEscKeyDown);
+    document.removeEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
   }
 
@@ -192,7 +192,7 @@ export default class TripPoint {
     );
   }
 
-  _onEscKeyDown(evt) {
+  _escKeyDownHandler(evt) {
     if (isEscKeyPressed(evt)) {
       evt.preventDefault();
       this.closeEditForm();
