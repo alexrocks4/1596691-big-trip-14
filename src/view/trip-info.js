@@ -32,7 +32,7 @@ const createTripInfoTemplate = (tripPoints) => {
   }, []);
 
   const tripPathString = tripPath.length > MAX_PATH_DISPLAY_LENGTH
-    ? `${tripPath[0]} ... ${tripPath[tripPath.length - 1]}`
+    ? `${tripPath[0]} &mdash;... &mdash; ${tripPath[tripPath.length - 1]}`
     : tripPath.join(' &mdash; ');
 
   return `<section class="trip-main__trip-info  trip-info">
