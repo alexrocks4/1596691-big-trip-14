@@ -52,7 +52,7 @@ const createFormTemplate = (state) => {
 
       return template + `<div class="event__offer-selector">
           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${id}"
-          ${isSelected ? 'checked' : ''} value="${id}" ${isDisabled ? 'disabled' : ''}>
+          ${isSelected ? 'checked' : ''} value="${id}" ${isDisabled ? 'disabled' : ''} data-title="${title}" data-price="${price}">
           <label class="event__offer-label" for="event-offer-${id}">
             <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
@@ -290,10 +290,13 @@ export default class TripEventForm extends SmartView {
 
     if (allOffers) {
       checkedCheckboxes.forEach((checkboxElement) => {
-        const title = checkboxElement.parentElement.querySelector('.event__offer-title').textContent;
-        const price = checkboxElement.parentElement.querySelector('.event__offer-price').textContent;
+        const offerModel = allOffers.find((offer) => {
+          return offer.title.toLowerCase() === checkboxElement.dataset.title.toLowerCase() && offer.price.toString() === checkboxElement.dataset.price;
+        });
 
-        checkedOffers.push({ title, price: parseInt(price, 10) });
+        if (offerModel) {
+          checkedOffers.push({ ...offerModel });
+        }
       });
     }
 
