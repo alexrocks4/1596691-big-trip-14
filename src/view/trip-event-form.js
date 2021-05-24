@@ -315,11 +315,11 @@ export default class TripEventForm extends SmartView {
 
     //Notify user if endDate is before startDate
     if (!this._state.isEndDateValid) {
+      this._renderEndDateError();
       this._submitElement.reportValidity();
       return;
     }
 
-    this._clearSubmitError();
     this._callback.formSubmit(TripEventForm.parseStateToData(this._state));
   }
 
@@ -429,7 +429,7 @@ export default class TripEventForm extends SmartView {
           ...{ price },
         },
       },
-    });
+    }, false);
   }
 
   _offersChangeHandler(evt) {
