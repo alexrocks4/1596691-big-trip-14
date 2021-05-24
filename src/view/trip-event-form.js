@@ -408,7 +408,6 @@ export default class TripEventForm extends SmartView {
 
   _priceChangeHandler(evt) {
     evt.preventDefault();
-
     const price = parseInt(evt.target.value, 10);
 
     if (!(Number.isInteger(price) && price > 0)) {
@@ -449,7 +448,7 @@ export default class TripEventForm extends SmartView {
     return {
       data: { ...option },
       isEditing: mode === FormMode.EDIT,
-      isOffersAvailable: !!option.allOffers[tripPoint.type],
+      isOffersAvailable: !!(option.allOffers[tripPoint.type] && option.allOffers[tripPoint.type].length),
       isDestinationVisible: !!tripPoint.destination.description || !!tripPoint.destination.pictures,
       isEndDateValid: TripEventForm.isEndDateValid(tripPoint.startDate, tripPoint.endDate),
       isSaving: false,
